@@ -1,0 +1,50 @@
+import { useState, useEffect } from 'react'
+import type { Session, User } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabase'
+
+export interface AuthState {
+  session: Session | null
+  user: User | null
+  loading: boolean
+}
+
+export function useAuth(): AuthState {
+  const [session, setSession] = useState<Session | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session)
+      setLoading(false)
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+      setLoading(false)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  return {
+    session,
+    user: session?.user ?? null,
+    loading,
+  }
+}
+
+export async function signInWithGoogle() {
+  const appUrl = (import.meta.env.VITE_APP_URL as string | undefined) ?? window.location.origin
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: appUrl,
+    },
+  })
+  if (error) throw error
+}
+
+export async function signOut() {
+  const { error } = await supabase.auth.signOut()
+  if (error) throw error
+}
