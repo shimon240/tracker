@@ -206,7 +206,10 @@ export function useApplications(): UseApplicationsResult {
         { event: '*', schema: 'public', table: 'applications' },
         (payload) => {
           if (payload.eventType === 'INSERT') {
-            setApplications(prev => [payload.new as Application, ...prev])
+            const newApp = payload.new as Application
+            setApplications(prev =>
+              prev.some(a => a.id === newApp.id) ? prev : [newApp, ...prev]
+            )
           } else if (payload.eventType === 'UPDATE') {
             setApplications(prev =>
               prev.map(a => a.id === (payload.new as Application).id ? payload.new as Application : a)
