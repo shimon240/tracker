@@ -8,7 +8,8 @@ import { ApplicationForm } from '@/components/ApplicationForm'
 import { ApplicationDetail } from '@/components/ApplicationDetail'
 import { Button } from '@/components/ui/button'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { Plus, Briefcase } from 'lucide-react'
+import { Plus, Briefcase, Loader2, AlertCircle, RefreshCw } from 'lucide-react'
+import type { ApplicationStatus } from '@/types'
 
 const DEFAULT_FILTERS: FilterState = {
   search: '',
@@ -20,6 +21,8 @@ const DEFAULT_FILTERS: FilterState = {
 export default function App() {
   const {
     applications,
+    loading,
+    error,
     addApplication,
     updateApplication,
     deleteApplication,
@@ -39,7 +42,6 @@ export default function App() {
   const [detailOpen, setDetailOpen] = useState(false)
 
   const filteredApps = useFilteredApplications(applications, filters, sortField, sortDirection)
-
   const totalForView = applications.filter(a => filters.showArchived ? a.archived : !a.archived).length
 
   const handleSort = useCallback((field: SortField) => {
@@ -68,23 +70,26 @@ export default function App() {
     setDetailOpen(true)
   }, [])
 
-  const handleSave = useCallback((data: Omit<Application, 'id' | 'created_at' | 'updated_at'>) => {
+  const handleSave = useCallback(async (data: Omit<Application, 'id' | 'created_at' | 'updated_at'>) => {
     if (editApp) {
-      updateApplication(editApp.id, data)
+      await updateApplication(editApp.id, data)
     } else {
-      addApplication(data)
+      await addApplication(data)
     }
     setFormOpen(false)
     setEditApp(null)
   }, [editApp, updateApplication, addApplication])
 
+  const handleStatusChange = useCallback((id: string, status: ApplicationStatus) => {
+    void updateStatus(id, status)
+  }, [updateStatus])
+
   const handleToggleArchived = useCallback(() => {
     setFilters(prev => ({ ...prev, showArchived: !prev.showArchived }))
   }, [])
 
-  // Sync detail app with latest data
   const currentDetailApp = detailApp
-    ? applications.find(a => a.id === detailApp.id) ?? detailApp
+    ? (applications.find(a => a.id === detailApp.id) ?? detailApp)
     : null
 
   return (
@@ -103,51 +108,86 @@ export default function App() {
               </div>
             </div>
 
-            <Button onClick={handleAdd} className="gap-1.5 shadow-sm" size="sm">
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Добавить отклик</span>
-              <span className="sm:hidden">Добавить</span>
-            </Button>
+            <div className="flex items-center gap-2">
+              {loading && (
+                <Loader2 className="h-4 w-4 text-gray-400 animate-spin" />
+              )}
+              <Button onClick={handleAdd} className="gap-1.5 shadow-sm" size="sm" disabled={loading}>
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">Добавить отклик</span>
+                <span className="sm:hidden">Добавить</span>
+              </Button>
+            </div>
           </div>
         </header>
 
         {/* Main content */}
         <main className="mx-auto max-w-7xl space-y-5 px-4 py-5 sm:px-6">
-          {/* Stats */}
-          <StatsCards
-            stats={stats}
-            showArchived={filters.showArchived}
-            onToggleArchived={handleToggleArchived}
-          />
 
-          {/* Table section */}
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-gray-800">
-                {filters.showArchived ? 'Архивные отклики' : 'Активные отклики'}
-              </h2>
+          {/* Error banner */}
+          {error && (
+            <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              <span className="flex-1">{error}</span>
+              <button
+                onClick={() => window.location.reload()}
+                className="inline-flex items-center gap-1.5 text-red-600 hover:text-red-800 font-medium"
+              >
+                <RefreshCw className="h-3.5 w-3.5" />
+                Обновить
+              </button>
             </div>
+          )}
 
-            <FiltersBar
-              filters={filters}
-              onFiltersChange={setFilters}
-              totalShown={filteredApps.length}
-              totalAll={totalForView}
-            />
+          {/* Loading skeleton */}
+          {loading ? (
+            <div className="space-y-5">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="h-20 rounded-xl border border-gray-100 bg-white animate-pulse" />
+                ))}
+              </div>
+              <div className="h-64 rounded-xl border border-gray-200 bg-white animate-pulse" />
+            </div>
+          ) : (
+            <>
+              {/* Stats */}
+              <StatsCards
+                stats={stats}
+                showArchived={filters.showArchived}
+                onToggleArchived={handleToggleArchived}
+              />
 
-            <ApplicationTable
-              applications={filteredApps}
-              sortField={sortField}
-              sortDirection={sortDirection}
-              onSort={handleSort}
-              onView={handleView}
-              onEdit={handleEdit}
-              onDelete={deleteApplication}
-              onArchive={archiveApplication}
-              onUnarchive={unarchiveApplication}
-              onStatusChange={updateStatus}
-            />
-          </div>
+              {/* Table section */}
+              <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-gray-800">
+                    {filters.showArchived ? 'Архивные отклики' : 'Активные отклики'}
+                  </h2>
+                </div>
+
+                <FiltersBar
+                  filters={filters}
+                  onFiltersChange={setFilters}
+                  totalShown={filteredApps.length}
+                  totalAll={totalForView}
+                />
+
+                <ApplicationTable
+                  applications={filteredApps}
+                  sortField={sortField}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  onView={handleView}
+                  onEdit={handleEdit}
+                  onDelete={id => void deleteApplication(id)}
+                  onArchive={id => void archiveApplication(id)}
+                  onUnarchive={id => void unarchiveApplication(id)}
+                  onStatusChange={handleStatusChange}
+                />
+              </div>
+            </>
+          )}
         </main>
 
         {/* Form modal */}
@@ -164,10 +204,10 @@ export default function App() {
           open={detailOpen}
           onClose={() => setDetailOpen(false)}
           onEdit={app => { setDetailOpen(false); handleEdit(app) }}
-          onDelete={id => { deleteApplication(id); setDetailOpen(false) }}
-          onArchive={id => { archiveApplication(id) }}
-          onUnarchive={id => { unarchiveApplication(id) }}
-          onStatusChange={(id, status) => updateStatus(id, status)}
+          onDelete={id => { void deleteApplication(id); setDetailOpen(false) }}
+          onArchive={id => void archiveApplication(id)}
+          onUnarchive={id => void unarchiveApplication(id)}
+          onStatusChange={handleStatusChange}
         />
       </div>
     </TooltipProvider>

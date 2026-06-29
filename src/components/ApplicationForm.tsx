@@ -18,7 +18,7 @@ import { Building2, Briefcase, Calendar, Send, ListChecks, StickyNote, FileText,
 interface ApplicationFormProps {
   open: boolean
   onClose: () => void
-  onSave: (data: Omit<Application, 'id' | 'created_at' | 'updated_at'>) => void
+  onSave: (data: Omit<Application, 'id' | 'created_at' | 'updated_at'>) => Promise<void>
   editData?: Application | null
 }
 
