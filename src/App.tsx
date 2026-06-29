@@ -1,15 +1,17 @@
 import { useState, useCallback } from 'react'
-import type { Application, FilterState, SortDirection, SortField } from '@/types'
+import type { Application, FilterState, SortDirection, SortField, ApplicationStatus } from '@/types'
 import { useApplications, useFilteredApplications } from '@/hooks/useApplications'
+import { useAuth } from '@/hooks/useAuth'
 import { StatsCards } from '@/components/StatsCards'
 import { FiltersBar } from '@/components/FiltersBar'
 import { ApplicationTable } from '@/components/ApplicationTable'
 import { ApplicationForm } from '@/components/ApplicationForm'
 import { ApplicationDetail } from '@/components/ApplicationDetail'
+import { LoginPage } from '@/components/LoginPage'
+import { UserMenu } from '@/components/UserMenu'
 import { Button } from '@/components/ui/button'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Plus, Briefcase, Loader2, AlertCircle, RefreshCw } from 'lucide-react'
-import type { ApplicationStatus } from '@/types'
 
 const DEFAULT_FILTERS: FilterState = {
   search: '',
@@ -19,6 +21,27 @@ const DEFAULT_FILTERS: FilterState = {
 }
 
 export default function App() {
+  const { session, user, loading: authLoading } = useAuth()
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3 text-gray-400">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <p className="text-sm">Загрузка...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!session || !user) {
+    return <LoginPage />
+  }
+
+  return <Dashboard user={user} />
+}
+
+function Dashboard({ user }: { user: NonNullable<ReturnType<typeof useAuth>['user']> }) {
   const {
     applications,
     loading,
@@ -55,22 +78,11 @@ export default function App() {
     })
   }, [])
 
-  const handleAdd = useCallback(() => {
-    setEditApp(null)
-    setFormOpen(true)
-  }, [])
+  const handleAdd = useCallback(() => { setEditApp(null); setFormOpen(true) }, [])
+  const handleEdit = useCallback((app: Application) => { setEditApp(app); setFormOpen(true) }, [])
+  const handleView = useCallback((app: Application) => { setDetailApp(app); setDetailOpen(true) }, [])
 
-  const handleEdit = useCallback((app: Application) => {
-    setEditApp(app)
-    setFormOpen(true)
-  }, [])
-
-  const handleView = useCallback((app: Application) => {
-    setDetailApp(app)
-    setDetailOpen(true)
-  }, [])
-
-  const handleSave = useCallback(async (data: Omit<Application, 'id' | 'created_at' | 'updated_at'>) => {
+  const handleSave = useCallback(async (data: Omit<Application, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
     if (editApp) {
       await updateApplication(editApp.id, data)
     } else {
@@ -108,23 +120,20 @@ export default function App() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              {loading && (
-                <Loader2 className="h-4 w-4 text-gray-400 animate-spin" />
-              )}
+            <div className="flex items-center gap-3">
+              {loading && <Loader2 className="h-4 w-4 text-gray-400 animate-spin" />}
               <Button onClick={handleAdd} className="gap-1.5 shadow-sm" size="sm" disabled={loading}>
                 <Plus className="h-4 w-4" />
                 <span className="hidden sm:inline">Добавить отклик</span>
                 <span className="sm:hidden">Добавить</span>
               </Button>
+              <UserMenu user={user} />
             </div>
           </div>
         </header>
 
         {/* Main content */}
         <main className="mx-auto max-w-7xl space-y-5 px-4 py-5 sm:px-6">
-
-          {/* Error banner */}
           {error && (
             <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               <AlertCircle className="h-4 w-4 shrink-0" />
@@ -139,7 +148,6 @@ export default function App() {
             </div>
           )}
 
-          {/* Loading skeleton */}
           {loading ? (
             <div className="space-y-5">
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
@@ -151,20 +159,16 @@ export default function App() {
             </div>
           ) : (
             <>
-              {/* Stats */}
               <StatsCards
                 stats={stats}
                 showArchived={filters.showArchived}
                 onToggleArchived={handleToggleArchived}
               />
 
-              {/* Table section */}
               <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-sm font-semibold text-gray-800">
-                    {filters.showArchived ? 'Архивные отклики' : 'Активные отклики'}
-                  </h2>
-                </div>
+                <h2 className="text-sm font-semibold text-gray-800">
+                  {filters.showArchived ? 'Архивные отклики' : 'Активные отклики'}
+                </h2>
 
                 <FiltersBar
                   filters={filters}
@@ -190,7 +194,6 @@ export default function App() {
           )}
         </main>
 
-        {/* Form modal */}
         <ApplicationForm
           open={formOpen}
           onClose={() => { setFormOpen(false); setEditApp(null) }}
@@ -198,7 +201,6 @@ export default function App() {
           editData={editApp}
         />
 
-        {/* Detail modal */}
         <ApplicationDetail
           application={currentDetailApp}
           open={detailOpen}

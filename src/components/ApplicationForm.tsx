@@ -18,11 +18,11 @@ import { Building2, Briefcase, Calendar, Send, ListChecks, StickyNote, FileText,
 interface ApplicationFormProps {
   open: boolean
   onClose: () => void
-  onSave: (data: Omit<Application, 'id' | 'created_at' | 'updated_at'>) => Promise<void>
+  onSave: (data: Omit<Application, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => Promise<void>
   editData?: Application | null
 }
 
-const DEFAULT_FORM: Omit<Application, 'id' | 'created_at' | 'updated_at'> = {
+const DEFAULT_FORM: Omit<Application, 'id' | 'user_id' | 'created_at' | 'updated_at'> = {
   company: '',
   position: '',
   date_applied: new Date().toISOString().split('T')[0],
@@ -42,7 +42,7 @@ export function ApplicationForm({ open, onClose, onSave, editData }: Application
   useEffect(() => {
     if (open) {
       if (editData) {
-        const { id: _id, created_at: _c, updated_at: _u, ...rest } = editData
+        const { id: _id, user_id: _uid, created_at: _c, updated_at: _u, ...rest } = editData
         setForm(rest)
       } else {
         setForm({ ...DEFAULT_FORM, date_applied: new Date().toISOString().split('T')[0] })

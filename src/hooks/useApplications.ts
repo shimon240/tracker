@@ -24,7 +24,7 @@ export const SUBMISSION_METHODS: SubmissionMethod[] = [
   'Другое',
 ]
 
-const SAMPLE_DATA: Omit<Application, 'id' | 'created_at' | 'updated_at'>[] = [
+const SAMPLE_DATA: Omit<Application, 'id' | 'user_id' | 'created_at' | 'updated_at'>[] = [
   {
     company: 'Яндекс',
     position: 'Senior Frontend Developer',
@@ -141,7 +141,7 @@ export interface UseApplicationsResult {
   applications: Application[]
   loading: boolean
   error: string | null
-  addApplication: (data: Omit<Application, 'id' | 'created_at' | 'updated_at'>) => Promise<void>
+  addApplication: (data: Omit<Application, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => Promise<void>
   updateApplication: (id: string, data: Partial<Application>) => Promise<void>
   deleteApplication: (id: string) => Promise<void>
   archiveApplication: (id: string) => Promise<void>
@@ -225,7 +225,7 @@ export function useApplications(): UseApplicationsResult {
   }, [])
 
   const addApplication = useCallback(async (
-    data: Omit<Application, 'id' | 'created_at' | 'updated_at'>
+    data: Omit<Application, 'id' | 'user_id' | 'created_at' | 'updated_at'>
   ) => {
     const { data: inserted, error: err } = await supabase
       .from('applications')
