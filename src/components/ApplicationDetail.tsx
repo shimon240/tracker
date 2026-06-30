@@ -1,7 +1,10 @@
 import type { Application, ApplicationStatus } from '@/types'
 import { STATUSES } from '@/hooks/useApplications'
+import { useApplicationEvents } from '@/hooks/useApplicationEvents'
 import { STATUS_CONFIG } from '@/lib/statusConfig'
 import { StatusBadge } from '@/components/StatusBadge'
+import { PriorityBadge } from '@/components/PriorityBadge'
+import { StatusTimeline } from '@/components/StatusTimeline'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
@@ -21,8 +24,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { format, parseISO } from 'date-fns'
-import { ru } from 'date-fns/locale'
+import { formatDate, formatDateTime, getDueStatus } from '@/lib/dateHelpers'
+import { formatSalary } from '@/lib/format'
 import {
   Building2,
   Calendar,
@@ -35,7 +38,16 @@ import {
   Archive,
   ArchiveRestore,
   Clock,
+  MapPin,
+  Link as LinkIcon,
+  User,
+  Mail,
+  Wallet,
+  Bell,
+  AlertTriangle,
+  Tag,
 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface ApplicationDetailProps {
   application: Application | null
@@ -48,20 +60,10 @@ interface ApplicationDetailProps {
   onStatusChange: (id: string, status: ApplicationStatus) => void
 }
 
-function formatDate(dateStr: string) {
-  try {
-    return format(parseISO(dateStr), 'd MMMM yyyy', { locale: ru })
-  } catch {
-    return dateStr
-  }
-}
-
-function formatDateTime(dateStr: string) {
-  try {
-    return format(parseISO(dateStr), 'd MMM yyyy, HH:mm', { locale: ru })
-  } catch {
-    return dateStr
-  }
+const DUE_LABELS: Record<string, { label: string; className: string }> = {
+  overdue: { label: 'Просрочено', className: 'bg-red-100 text-red-700' },
+  today: { label: 'Сегодня', className: 'bg-orange-100 text-orange-700' },
+  soon: { label: 'Скоро', className: 'bg-amber-100 text-amber-700' },
 }
 
 export function ApplicationDetail({
@@ -74,7 +76,13 @@ export function ApplicationDetail({
   onUnarchive,
   onStatusChange,
 }: ApplicationDetailProps) {
+  const { events, loading: eventsLoading } = useApplicationEvents(application?.id ?? null)
+
   if (!application) return null
+
+  const dueStatus = getDueStatus(application.next_step_date, application.status)
+  const dueInfo = DUE_LABELS[dueStatus]
+  const salary = formatSalary(application.salary_min, application.salary_max, application.salary_currency)
 
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
@@ -88,13 +96,25 @@ export function ApplicationDetail({
               <div className="mt-1 flex items-center gap-2 text-gray-600">
                 <Building2 className="h-4 w-4 shrink-0" />
                 <span className="font-medium">{application.company}</span>
+                {application.location && (
+                  <>
+                    <span className="text-gray-300">·</span>
+                    <span className="inline-flex items-center gap-1 text-sm text-gray-500">
+                      <MapPin className="h-3.5 w-3.5" />
+                      {application.location}
+                    </span>
+                  </>
+                )}
               </div>
             </div>
-            {application.archived && (
-              <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600 shrink-0">
-                Архив
-              </span>
-            )}
+            <div className="flex flex-col items-end gap-1.5 shrink-0">
+              <PriorityBadge priority={application.priority} />
+              {application.archived && (
+                <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
+                  Архив
+                </span>
+              )}
+            </div>
           </div>
         </DialogHeader>
 
@@ -111,7 +131,25 @@ export function ApplicationDetail({
               <span>Способ:</span>
               <span className="font-medium text-gray-900">{application.submission_method}</span>
             </div>
+            {salary && (
+              <div className="flex items-center gap-1.5 text-gray-600">
+                <Wallet className="h-4 w-4 text-gray-400" />
+                <span className="font-medium text-gray-900">{salary}</span>
+              </div>
+            )}
           </div>
+
+          {/* Tags */}
+          {application.tags.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Tag className="h-3.5 w-3.5 text-gray-400" />
+              {application.tags.map(tag => (
+                <span key={tag} className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
 
           {/* Status changer */}
           <div className="space-y-2">
@@ -146,13 +184,62 @@ export function ApplicationDetail({
           {/* Next step */}
           {application.next_step && (
             <div className="space-y-1.5">
-              <p className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
-                <ArrowRight className="h-4 w-4 text-blue-500" />
-                Следующий шаг
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
+                  <ArrowRight className="h-4 w-4 text-blue-500" />
+                  Следующий шаг
+                </p>
+                {application.next_step_date && (
+                  <span className={cn(
+                    'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
+                    dueInfo ? dueInfo.className : 'bg-gray-100 text-gray-600'
+                  )}>
+                    {dueStatus === 'overdue' && <AlertTriangle className="h-3 w-3" />}
+                    {dueStatus !== 'none' && <Bell className="h-3 w-3" />}
+                    {dueInfo ? dueInfo.label : formatDate(application.next_step_date, 'd MMM')}
+                  </span>
+                )}
+              </div>
               <p className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-sm text-blue-900">
                 {application.next_step}
+                {application.next_step_date && (
+                  <span className="block mt-1 text-xs text-blue-600">
+                    Дата: {formatDate(application.next_step_date)}
+                  </span>
+                )}
               </p>
+            </div>
+          )}
+
+          {/* Contact & company info */}
+          {(application.contact_name || application.contact_email || application.company_url) && (
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 text-sm">
+              {application.contact_name && (
+                <div className="flex items-center gap-1.5 text-gray-600">
+                  <User className="h-3.5 w-3.5 text-gray-400" />
+                  {application.contact_name}
+                </div>
+              )}
+              {application.contact_email && (
+                <a
+                  href={`mailto:${application.contact_email}`}
+                  className="flex items-center gap-1.5 text-blue-600 hover:underline"
+                >
+                  <Mail className="h-3.5 w-3.5" />
+                  {application.contact_email}
+                </a>
+              )}
+              {application.company_url && (
+                <a
+                  href={application.company_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-blue-600 hover:underline sm:col-span-2"
+                >
+                  <LinkIcon className="h-3.5 w-3.5" />
+                  {application.company_url}
+                </a>
+              )}
             </div>
           )}
 
@@ -181,6 +268,9 @@ export function ApplicationDetail({
               </div>
             </div>
           )}
+
+          {/* Status history timeline */}
+          <StatusTimeline events={events} loading={eventsLoading} />
 
           {/* Timestamps */}
           <div className="flex items-center gap-1 text-xs text-gray-400 pt-1">
@@ -256,4 +346,3 @@ export function ApplicationDetail({
     </Dialog>
   )
 }
-
