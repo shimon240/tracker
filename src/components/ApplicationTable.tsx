@@ -1,6 +1,8 @@
 import type { Application, ApplicationStatus, SortDirection, SortField } from '@/types'
 import { StatusBadge } from '@/components/StatusBadge'
+import { PriorityBadge } from '@/components/PriorityBadge'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,8 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { format, parseISO } from 'date-fns'
-import { ru } from 'date-fns/locale'
+import { formatDateShort, getDueStatus } from '@/lib/dateHelpers'
 import {
   ChevronUp,
   ChevronDown,
@@ -31,6 +32,8 @@ import {
   ArchiveRestore,
   Trash2,
   ClipboardList,
+  Bell,
+  AlertTriangle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
@@ -46,19 +49,24 @@ interface ApplicationTableProps {
   onArchive: (id: string) => void
   onUnarchive: (id: string) => void
   onStatusChange: (id: string, status: ApplicationStatus) => void
+  selectedIds: Set<string>
+  onToggleSelect: (id: string) => void
+  onToggleSelectAll: () => void
 }
 
 interface Column {
-  key: SortField | 'actions' | 'method'
+  key: SortField | 'actions' | 'method' | 'select' | 'priority'
   label: string
   sortable: boolean
   className?: string
 }
 
 const COLUMNS: Column[] = [
-  { key: 'company', label: 'Компания / Вакансия', sortable: true, className: 'min-w-[200px]' },
-  { key: 'date_applied', label: 'Дата', sortable: true, className: 'w-32' },
-  { key: 'method', label: 'Способ', sortable: false, className: 'w-36 hidden md:table-cell' },
+  { key: 'select', label: '', sortable: false, className: 'w-10' },
+  { key: 'company', label: 'Компания / Вакансия', sortable: true, className: 'min-w-[220px]' },
+  { key: 'priority', label: 'Приоритет', sortable: true, className: 'w-28 hidden sm:table-cell' },
+  { key: 'date_applied', label: 'Дата', sortable: true, className: 'w-28' },
+  { key: 'method', label: 'Способ', sortable: false, className: 'w-32 hidden md:table-cell' },
   { key: 'status', label: 'Статус', sortable: true, className: 'w-44' },
   { key: 'actions', label: '', sortable: false, className: 'w-10' },
 ]
@@ -79,6 +87,9 @@ export function ApplicationTable({
   onDelete,
   onArchive,
   onUnarchive,
+  selectedIds,
+  onToggleSelect,
+  onToggleSelectAll,
 }: ApplicationTableProps) {
   const [deleteTarget, setDeleteTarget] = useState<Application | null>(null)
 
@@ -91,6 +102,8 @@ export function ApplicationTable({
       </div>
     )
   }
+
+  const allSelected = applications.length > 0 && applications.every(a => selectedIds.has(a.id))
 
   return (
     <>
@@ -107,14 +120,18 @@ export function ApplicationTable({
                       col.className,
                       col.sortable && 'cursor-pointer select-none hover:text-gray-700'
                     )}
-                    onClick={() => col.sortable && col.key !== 'method' && col.key !== 'actions' && onSort(col.key as SortField)}
+                    onClick={() => col.sortable && onSort(col.key as SortField)}
                   >
-                    <div className="flex items-center gap-1">
-                      {col.label}
-                      {col.sortable && col.key !== 'method' && col.key !== 'actions' && (
-                        <SortIcon field={col.key as SortField} sortField={sortField} sortDirection={sortDirection} />
-                      )}
-                    </div>
+                    {col.key === 'select' ? (
+                      <Checkbox checked={allSelected} onCheckedChange={onToggleSelectAll} />
+                    ) : (
+                      <div className="flex items-center gap-1">
+                        {col.label}
+                        {col.sortable && (
+                          <SortIcon field={col.key as SortField} sortField={sortField} sortDirection={sortDirection} />
+                        )}
+                      </div>
+                    )}
                   </th>
                 ))}
               </tr>
@@ -129,6 +146,8 @@ export function ApplicationTable({
                   onDelete={setDeleteTarget}
                   onArchive={onArchive}
                   onUnarchive={onUnarchive}
+                  selected={selectedIds.has(app.id)}
+                  onToggleSelect={() => onToggleSelect(app.id)}
                 />
               ))}
             </tbody>
@@ -169,48 +188,67 @@ interface ApplicationRowProps {
   onDelete: (app: Application) => void
   onArchive: (id: string) => void
   onUnarchive: (id: string) => void
+  selected: boolean
+  onToggleSelect: () => void
 }
 
-function ApplicationRow({ app, onView, onEdit, onDelete, onArchive, onUnarchive }: ApplicationRowProps) {
-  const dateFormatted = (() => {
-    try {
-      return format(parseISO(app.date_applied), 'd MMM', { locale: ru })
-    } catch {
-      return app.date_applied
-    }
-  })()
-
-  const yearFormatted = (() => {
-    try {
-      return format(parseISO(app.date_applied), 'yyyy')
-    } catch {
-      return ''
-    }
-  })()
+function ApplicationRow({ app, onView, onEdit, onDelete, onArchive, onUnarchive, selected, onToggleSelect }: ApplicationRowProps) {
+  const dateFormatted = formatDateShort(app.date_applied)
+  const dueStatus = getDueStatus(app.next_step_date, app.status)
 
   return (
     <tr
       className={cn(
         'group hover:bg-blue-50/30 transition-colors cursor-pointer',
-        app.archived && 'opacity-60'
+        app.archived && 'opacity-60',
+        selected && 'bg-blue-50/50'
       )}
       onClick={() => onView(app)}
     >
+      {/* Select */}
+      <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
+        <Checkbox checked={selected} onCheckedChange={onToggleSelect} />
+      </td>
+
       {/* Company / Position */}
       <td className="px-4 py-3">
         <div className="font-medium text-gray-900 group-hover:text-blue-700 transition-colors leading-tight">
           {app.company}
         </div>
         <div className="text-gray-500 text-xs mt-0.5 line-clamp-1">{app.position}</div>
-        {app.short_note && (
-          <div className="text-gray-400 text-xs mt-0.5 line-clamp-1 italic">{app.short_note}</div>
+        {app.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-1">
+            {app.tags.slice(0, 3).map(tag => (
+              <span key={tag} className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500">
+                {tag}
+              </span>
+            ))}
+          </div>
         )}
+      </td>
+
+      {/* Priority */}
+      <td className="px-4 py-3 hidden sm:table-cell">
+        <PriorityBadge priority={app.priority} />
       </td>
 
       {/* Date */}
       <td className="px-4 py-3">
         <div className="text-gray-800 font-medium tabular-nums">{dateFormatted}</div>
-        <div className="text-gray-400 text-xs">{yearFormatted}</div>
+        {dueStatus !== 'none' && (
+          <div
+            className={cn(
+              'inline-flex items-center gap-0.5 mt-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium',
+              dueStatus === 'overdue' && 'bg-red-100 text-red-700',
+              dueStatus === 'today' && 'bg-orange-100 text-orange-700',
+              dueStatus === 'soon' && 'bg-amber-100 text-amber-700',
+              dueStatus === 'later' && 'bg-gray-100 text-gray-500'
+            )}
+          >
+            {dueStatus === 'overdue' ? <AlertTriangle className="h-2.5 w-2.5" /> : <Bell className="h-2.5 w-2.5" />}
+            {formatDateShort(app.next_step_date)}
+          </div>
+        )}
       </td>
 
       {/* Method */}
