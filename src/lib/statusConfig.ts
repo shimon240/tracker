@@ -1,4 +1,4 @@
-import type { ApplicationStatus, SubmissionMethod } from '@/types'
+import type { ApplicationStatus, Priority, SubmissionMethod } from '@/types'
 
 export type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning' | 'info' | 'purple'
 
@@ -84,4 +84,38 @@ export const METHOD_CONFIG: Record<SubmissionMethod, { icon: string; color: stri
   'hh.ru': { icon: 'hh', color: 'text-red-600' },
   'Реферал': { icon: '🤝', color: 'text-green-600' },
   'Другое': { icon: '•', color: 'text-gray-600' },
+}
+
+interface PriorityConfig {
+  label: string
+  color: string
+  bgColor: string
+  borderColor: string
+}
+
+export const PRIORITY_CONFIG: Record<Priority, PriorityConfig> = {
+  'Низкий': {
+    label: 'Низкий',
+    color: 'text-gray-500',
+    bgColor: 'bg-gray-50',
+    borderColor: 'border-gray-200',
+  },
+  'Средний': {
+    label: 'Средний',
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-50',
+    borderColor: 'border-blue-200',
+  },
+  'Высокий': {
+    label: 'Высокий',
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-50',
+    borderColor: 'border-orange-200',
+  },
+  'Мечта': {
+    label: 'Мечта',
+    color: 'text-pink-600',
+    bgColor: 'bg-pink-50',
+    borderColor: 'border-pink-200',
+  },
 }
