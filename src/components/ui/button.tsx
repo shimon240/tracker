@@ -3,21 +3,27 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium ds-transition ds-focus-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.98]',
   {
     variants: {
       variant: {
-        default: 'bg-blue-600 text-white hover:bg-blue-700',
-        destructive: 'bg-red-500 text-white hover:bg-red-600',
-        outline: 'border border-gray-200 bg-white hover:bg-gray-50 hover:text-gray-900',
-        secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200',
-        ghost: 'hover:bg-gray-100 hover:text-gray-900',
-        link: 'text-blue-600 underline-offset-4 hover:underline',
+        default:
+          'bg-accent text-white ds-shadow-accent hover:bg-accent-bright hover:shadow-[0_0_0_1px_rgb(94_106_210/0.6),0_6px_20px_rgb(94_106_210/0.35),inset_0_1px_0_0_rgb(255_255_255/0.2)]',
+        destructive:
+          'bg-destructive/90 text-white hover:bg-destructive ds-shadow-inset',
+        outline:
+          'border border-border bg-surface text-foreground hover:bg-surface-hover hover:border-border-hover ds-shadow-inset',
+        secondary:
+          'bg-surface text-foreground hover:bg-surface-hover ds-shadow-inset',
+        ghost:
+          'text-foreground-muted hover:bg-surface hover:text-foreground',
+        link:
+          'text-accent underline-offset-4 hover:text-accent-bright hover:underline',
       },
       size: {
         default: 'h-9 px-4 py-2',
-        sm: 'h-8 rounded-md px-3 text-xs',
-        lg: 'h-10 rounded-md px-8',
+        sm: 'h-8 px-3 text-xs',
+        lg: 'h-10 px-8',
         icon: 'h-9 w-9',
       },
     },

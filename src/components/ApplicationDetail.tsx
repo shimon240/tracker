@@ -90,16 +90,16 @@ export function ApplicationDetail({
         <DialogHeader>
           <div className="flex items-start justify-between gap-3 pr-6">
             <div className="min-w-0 flex-1">
-              <DialogTitle className="text-xl font-bold text-gray-900 leading-tight">
+              <DialogTitle className="text-xl font-bold text-foreground leading-tight">
                 {application.position}
               </DialogTitle>
-              <div className="mt-1 flex items-center gap-2 text-gray-600">
+              <div className="mt-1 flex items-center gap-2 text-foreground-muted">
                 <Building2 className="h-4 w-4 shrink-0" />
                 <span className="font-medium">{application.company}</span>
                 {application.location && (
                   <>
-                    <span className="text-gray-300">·</span>
-                    <span className="inline-flex items-center gap-1 text-sm text-gray-500">
+                    <span className="text-foreground-subtle">·</span>
+                    <span className="inline-flex items-center gap-1 text-sm text-foreground-muted">
                       <MapPin className="h-3.5 w-3.5" />
                       {application.location}
                     </span>
@@ -110,7 +110,7 @@ export function ApplicationDetail({
             <div className="flex flex-col items-end gap-1.5 shrink-0">
               <PriorityBadge priority={application.priority} />
               {application.archived && (
-                <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
+                <span className="inline-flex items-center rounded-full bg-surface border border-border px-2.5 py-0.5 text-xs font-medium text-foreground-muted">
                   Архив
                 </span>
               )}
@@ -120,21 +120,21 @@ export function ApplicationDetail({
 
         <div className="space-y-5">
           {/* Meta info row */}
-          <div className="flex flex-wrap gap-4 rounded-lg bg-gray-50 p-3 text-sm">
-            <div className="flex items-center gap-1.5 text-gray-600">
-              <Calendar className="h-4 w-4 text-gray-400" />
+          <div className="flex flex-wrap gap-4 rounded-lg bg-surface/50 border border-border p-3 text-sm">
+            <div className="flex items-center gap-1.5 text-foreground-muted">
+              <Calendar className="h-4 w-4 text-foreground-muted" />
               <span>Дата отклика:</span>
-              <span className="font-medium text-gray-900">{formatDate(application.date_applied)}</span>
+              <span className="font-medium text-foreground">{formatDate(application.date_applied)}</span>
             </div>
-            <div className="flex items-center gap-1.5 text-gray-600">
-              <Send className="h-4 w-4 text-gray-400" />
+            <div className="flex items-center gap-1.5 text-foreground-muted">
+              <Send className="h-4 w-4 text-foreground-muted" />
               <span>Способ:</span>
-              <span className="font-medium text-gray-900">{application.submission_method}</span>
+              <span className="font-medium text-foreground">{application.submission_method}</span>
             </div>
             {salary && (
-              <div className="flex items-center gap-1.5 text-gray-600">
-                <Wallet className="h-4 w-4 text-gray-400" />
-                <span className="font-medium text-gray-900">{salary}</span>
+              <div className="flex items-center gap-1.5 text-foreground-muted">
+                <Wallet className="h-4 w-4 text-foreground-muted" />
+                <span className="font-medium text-foreground">{salary}</span>
               </div>
             )}
           </div>
@@ -142,9 +142,9 @@ export function ApplicationDetail({
           {/* Tags */}
           {application.tags.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5">
-              <Tag className="h-3.5 w-3.5 text-gray-400" />
+              <Tag className="h-3.5 w-3.5 text-foreground-muted" />
               {application.tags.map(tag => (
-                <span key={tag} className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                <span key={tag} className="rounded-full bg-accent/15 border border-accent/30 text-accent-bright">
                   {tag}
                 </span>
               ))}
@@ -153,10 +153,10 @@ export function ApplicationDetail({
 
           {/* Status changer */}
           <div className="space-y-2">
-            <p className="text-sm font-medium text-gray-700">Статус</p>
+            <p className="text-sm font-medium text-foreground">Статус</p>
             <div className="flex items-center gap-3">
               <StatusBadge status={application.status} />
-              <ArrowRight className="h-4 w-4 text-gray-300" />
+              <ArrowRight className="h-4 w-4 text-foreground-subtle" />
               <Select
                 value={application.status}
                 onValueChange={v => onStatusChange(application.id, v as ApplicationStatus)}
@@ -185,14 +185,14 @@ export function ApplicationDetail({
           {application.next_step && (
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <p className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
+                <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
                   <ArrowRight className="h-4 w-4 text-blue-500" />
                   Следующий шаг
                 </p>
                 {application.next_step_date && (
                   <span className={cn(
                     'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
-                    dueInfo ? dueInfo.className : 'bg-gray-100 text-gray-600'
+                    dueInfo ? dueInfo.className : 'bg-surface border border-border text-foreground-muted'
                   )}>
                     {dueStatus === 'overdue' && <AlertTriangle className="h-3 w-3" />}
                     {dueStatus !== 'none' && <Bell className="h-3 w-3" />}
@@ -215,8 +215,8 @@ export function ApplicationDetail({
           {(application.contact_name || application.contact_email || application.company_url) && (
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 text-sm">
               {application.contact_name && (
-                <div className="flex items-center gap-1.5 text-gray-600">
-                  <User className="h-3.5 w-3.5 text-gray-400" />
+                <div className="flex items-center gap-1.5 text-foreground-muted">
+                  <User className="h-3.5 w-3.5 text-foreground-muted" />
                   {application.contact_name}
                 </div>
               )}
@@ -246,7 +246,7 @@ export function ApplicationDetail({
           {/* Short note */}
           {application.short_note && (
             <div className="space-y-1.5">
-              <p className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
+              <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
                 <StickyNote className="h-4 w-4 text-amber-500" />
                 Заметка
               </p>
@@ -259,11 +259,11 @@ export function ApplicationDetail({
           {/* Job description */}
           {application.job_description && (
             <div className="space-y-1.5">
-              <p className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
-                <FileText className="h-4 w-4 text-gray-500" />
+              <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+                <FileText className="h-4 w-4 text-foreground-muted" />
                 Описание вакансии
               </p>
-              <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-800 whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto scrollbar-thin">
+              <div className="rounded-lg border border-gray-200 bg-surface/50 border border-border px-4 py-3 text-sm text-gray-800 whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto scrollbar-thin">
                 {application.job_description}
               </div>
             </div>
@@ -273,7 +273,7 @@ export function ApplicationDetail({
           <StatusTimeline events={events} loading={eventsLoading} />
 
           {/* Timestamps */}
-          <div className="flex items-center gap-1 text-xs text-gray-400 pt-1">
+          <div className="flex items-center gap-1 text-xs text-foreground-muted pt-1">
             <Clock className="h-3 w-3" />
             <span>Создано: {formatDateTime(application.created_at)}</span>
             <span className="mx-1">·</span>
@@ -307,7 +307,7 @@ export function ApplicationDetail({
                 variant="outline"
                 size="sm"
                 onClick={() => { onArchive(application.id); onClose() }}
-                className="gap-1.5 text-gray-600"
+                className="gap-1.5 text-foreground-muted"
               >
                 <Archive className="h-3.5 w-3.5" />
                 В архив

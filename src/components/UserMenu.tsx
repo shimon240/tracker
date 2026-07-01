@@ -27,15 +27,15 @@ export function UserMenu({ user }: UserMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center gap-2 rounded-full p-0.5 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+        <button className="flex items-center gap-2 rounded-full p-0.5 hover:bg-surface ds-transition ds-focus-ring">
           {avatarUrl ? (
             <img
               src={avatarUrl}
               alt={name}
-              className="h-8 w-8 rounded-full object-cover border border-gray-200"
+              className="h-8 w-8 rounded-full object-cover border border-border"
             />
           ) : (
-            <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-semibold text-blue-700 border border-blue-200">
+            <div className="h-8 w-8 rounded-full bg-accent/20 flex items-center justify-center text-xs font-semibold text-accent-bright border border-accent/30">
               {initials || <UserIcon className="h-4 w-4" />}
             </div>
           )}
@@ -45,14 +45,14 @@ export function UserMenu({ user }: UserMenuProps) {
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col gap-0.5">
-            <p className="text-sm font-medium text-gray-900 truncate">{name}</p>
-            <p className="text-xs text-gray-500 truncate">{user.email}</p>
+            <p className="text-sm font-medium text-foreground truncate">{name}</p>
+            <p className="text-xs text-foreground-muted truncate">{user.email}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => void signOut()}
-          className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
+          className="text-red-300 focus:text-red-200 focus:bg-red-500/10 cursor-pointer"
         >
           <LogOut className="h-4 w-4" />
           Выйти

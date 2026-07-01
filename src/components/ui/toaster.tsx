@@ -9,15 +9,15 @@ const ICONS = {
 }
 
 const STYLES = {
-  default: 'border-gray-200 bg-white text-gray-900',
-  success: 'border-emerald-200 bg-emerald-50 text-emerald-900',
-  error: 'border-red-200 bg-red-50 text-red-900',
+  default: 'border-border bg-background-elevated text-foreground',
+  success: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200',
+  error: 'border-red-500/30 bg-red-500/10 text-red-200',
 }
 
 const ICON_COLORS = {
-  default: 'text-gray-400',
-  success: 'text-emerald-500',
-  error: 'text-red-500',
+  default: 'text-foreground-muted',
+  success: 'text-emerald-400',
+  error: 'text-red-400',
 }
 
 export function Toaster() {
@@ -34,7 +34,7 @@ export function Toaster() {
             key={t.id}
             role="status"
             className={cn(
-              'flex items-start gap-3 rounded-xl border p-3.5 shadow-lg animate-in slide-in-from-bottom-2 fade-in-0',
+              'flex items-start gap-3 rounded-2xl border p-3.5 ds-shadow-card animate-in slide-in-from-bottom-2 fade-in-0',
               STYLES[t.variant]
             )}
           >
@@ -42,12 +42,12 @@ export function Toaster() {
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium leading-tight">{t.title}</p>
               {t.description && (
-                <p className="text-xs mt-0.5 opacity-80 leading-snug">{t.description}</p>
+                <p className="text-xs mt-0.5 text-foreground-muted leading-snug">{t.description}</p>
               )}
             </div>
             <button
               onClick={() => dismiss(t.id)}
-              className="shrink-0 opacity-50 hover:opacity-100 transition-opacity"
+              className="shrink-0 text-foreground-muted hover:text-foreground ds-transition"
             >
               <X className="h-4 w-4" />
             </button>

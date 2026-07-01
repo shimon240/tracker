@@ -64,9 +64,9 @@ interface ResizeState {
 }
 
 function SortIcon({ field, sortField, sortDirection }: { field: SortField; sortField: SortField; sortDirection: SortDirection }) {
-  if (field !== sortField) return <ChevronsUpDown className="h-3.5 w-3.5 text-gray-300" />
-  if (sortDirection === 'asc') return <ChevronUp className="h-3.5 w-3.5 text-blue-500" />
-  return <ChevronDown className="h-3.5 w-3.5 text-blue-500" />
+  if (field !== sortField) return <ChevronsUpDown className="h-3.5 w-3.5 text-foreground-subtle" />
+  if (sortDirection === 'asc') return <ChevronUp className="h-3.5 w-3.5 text-accent" />
+  return <ChevronDown className="h-3.5 w-3.5 text-accent" />
 }
 
 function columnStyle(width: number): CSSProperties {
@@ -121,10 +121,10 @@ export function ApplicationTable({
 
   if (applications.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 py-16 text-center">
-        <ClipboardList className="h-12 w-12 text-gray-300 mb-3" />
-        <p className="text-base font-medium text-gray-500">Откликов не найдено</p>
-        <p className="mt-1 text-sm text-gray-400">Добавьте первый отклик или измените фильтры</p>
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-surface/50 py-16 text-center">
+        <ClipboardList className="h-12 w-12 text-foreground-subtle mb-3" />
+        <p className="text-base font-medium text-foreground-muted">Откликов не найдено</p>
+        <p className="mt-1 text-sm text-foreground-subtle">Добавьте первый отклик или измените фильтры</p>
       </div>
     )
   }
@@ -133,7 +133,7 @@ export function ApplicationTable({
 
   return (
     <>
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-border bg-surface/30 overflow-hidden ds-shadow-card">
         <div className="overflow-x-auto">
           <table className="w-full text-sm table-fixed">
             <colgroup>
@@ -142,15 +142,15 @@ export function ApplicationTable({
               ))}
             </colgroup>
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50">
+              <tr className="border-b border-border bg-surface/50">
                 {TABLE_COLUMNS.map(col => (
                   <th
                     key={col.key}
                     style={columnStyle(widths[col.key])}
                     className={cn(
-                      'relative px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide overflow-hidden',
+                      'relative px-4 py-3 text-left text-xs font-medium text-foreground-muted uppercase tracking-widest font-mono overflow-hidden',
                       col.className,
-                      col.sortable && 'cursor-pointer select-none hover:text-gray-700'
+                      col.sortable && 'cursor-pointer select-none hover:text-foreground'
                     )}
                     onClick={() => col.sortable && onSort(col.key as SortField)}
                   >
@@ -171,8 +171,8 @@ export function ApplicationTable({
                         aria-label={`Изменить ширину столбца ${col.label || col.key}`}
                         className={cn(
                           'absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none',
-                          'hover:bg-blue-400/60 active:bg-blue-500/70',
-                          resizing?.key === col.key && 'bg-blue-500/70'
+                          'hover:bg-accent/60 active:bg-accent/80',
+                          resizing?.key === col.key && 'bg-accent/80'
                         )}
                         onMouseDown={event => {
                           event.preventDefault()
@@ -186,7 +186,7 @@ export function ApplicationTable({
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-border">
               {applications.map(app => (
                 <ApplicationRow
                   key={app.id}
@@ -252,9 +252,9 @@ function ApplicationRow({ app, widths, onView, onEdit, onDelete, onArchive, onUn
   return (
     <tr
       className={cn(
-        'group hover:bg-blue-50/30 transition-colors cursor-pointer',
+        'group hover:bg-accent/5 ds-transition cursor-pointer',
         app.archived && 'opacity-60',
-        selected && 'bg-blue-50/50'
+        selected && 'bg-accent/10'
       )}
       onClick={() => onView(app)}
     >
@@ -263,14 +263,14 @@ function ApplicationRow({ app, widths, onView, onEdit, onDelete, onArchive, onUn
       </td>
 
       <td style={cell('company')} className="px-4 py-3 overflow-hidden">
-        <div className="font-medium text-gray-900 group-hover:text-blue-700 transition-colors leading-tight truncate">
+        <div className="font-medium text-foreground group-hover:text-accent-bright ds-transition leading-tight truncate">
           {app.company}
         </div>
-        <div className="text-gray-500 text-xs mt-0.5 truncate">{app.position}</div>
+        <div className="text-foreground-muted text-xs mt-0.5 truncate">{app.position}</div>
         {app.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1 overflow-hidden">
             {app.tags.slice(0, 3).map(tag => (
-              <span key={tag} className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 truncate max-w-full">
+              <span key={tag} className="rounded-full bg-surface border border-border px-1.5 py-0.5 text-[10px] font-medium text-foreground-muted truncate max-w-full">
                 {tag}
               </span>
             ))}
@@ -283,15 +283,15 @@ function ApplicationRow({ app, widths, onView, onEdit, onDelete, onArchive, onUn
       </td>
 
       <td style={cell('date_applied')} className="px-4 py-3 overflow-hidden">
-        <div className="text-gray-800 font-medium tabular-nums truncate">{dateFormatted}</div>
+        <div className="text-foreground font-medium tabular-nums truncate">{dateFormatted}</div>
         {dueStatus !== 'none' && (
           <div
             className={cn(
               'inline-flex items-center gap-0.5 mt-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium max-w-full truncate',
-              dueStatus === 'overdue' && 'bg-red-100 text-red-700',
-              dueStatus === 'today' && 'bg-orange-100 text-orange-700',
-              dueStatus === 'soon' && 'bg-amber-100 text-amber-700',
-              dueStatus === 'later' && 'bg-gray-100 text-gray-500'
+              dueStatus === 'overdue' && 'bg-red-500/15 text-red-300 border border-red-500/25',
+              dueStatus === 'today' && 'bg-orange-500/15 text-orange-300 border border-orange-500/25',
+              dueStatus === 'soon' && 'bg-amber-500/15 text-amber-300 border border-amber-500/25',
+              dueStatus === 'later' && 'bg-surface text-foreground-muted border border-border'
             )}
           >
             {dueStatus === 'overdue' ? <AlertTriangle className="h-2.5 w-2.5 shrink-0" /> : <Bell className="h-2.5 w-2.5 shrink-0" />}
@@ -301,7 +301,7 @@ function ApplicationRow({ app, widths, onView, onEdit, onDelete, onArchive, onUn
       </td>
 
       <td style={cell('method')} className="px-4 py-3 hidden md:table-cell overflow-hidden">
-        <span className="text-xs text-gray-600 bg-gray-100 rounded-full px-2 py-0.5 truncate inline-block max-w-full">
+        <span className="text-xs text-foreground-muted bg-surface border border-border rounded-full px-2 py-0.5 truncate inline-block max-w-full">
           {app.submission_method}
         </span>
       </td>
@@ -309,7 +309,7 @@ function ApplicationRow({ app, widths, onView, onEdit, onDelete, onArchive, onUn
       <td style={cell('status')} className="px-4 py-3 overflow-hidden">
         <StatusBadge status={app.status} />
         {app.next_step && (
-          <div className="text-xs text-gray-400 mt-1 truncate">{app.next_step}</div>
+          <div className="text-xs text-foreground-subtle mt-1 truncate">{app.next_step}</div>
         )}
       </td>
 
@@ -348,7 +348,7 @@ function ApplicationRow({ app, widths, onView, onEdit, onDelete, onArchive, onUn
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => onDelete(app)}
-              className="text-red-600 focus:text-red-600 focus:bg-red-50"
+              className="text-red-300 focus:text-red-200 focus:bg-red-500/10"
             >
               <Trash2 className="h-4 w-4" />
               Удалить

@@ -122,8 +122,8 @@ export function ApplicationForm({ open, onClose, onSave, editData, allApplicatio
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-gray-900">
-            <Briefcase className="h-5 w-5 text-blue-600" />
+          <DialogTitle className="flex items-center gap-2 text-foreground">
+            <Briefcase className="h-5 w-5 text-accent" />
             {editData ? 'Редактировать отклик' : 'Новый отклик'}
           </DialogTitle>
         </DialogHeader>
@@ -133,7 +133,7 @@ export function ApplicationForm({ open, onClose, onSave, editData, allApplicatio
           <div className="space-y-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="company" className="flex items-center gap-1.5 text-gray-700">
+                <Label htmlFor="company" className="flex items-center gap-1.5 text-foreground">
                   <Building2 className="h-3.5 w-3.5" />
                   Компания <span className="text-red-500">*</span>
                 </Label>
@@ -148,7 +148,7 @@ export function ApplicationForm({ open, onClose, onSave, editData, allApplicatio
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="position" className="flex items-center gap-1.5 text-gray-700">
+                <Label htmlFor="position" className="flex items-center gap-1.5 text-foreground">
                   <Briefcase className="h-3.5 w-3.5" />
                   Вакансия <span className="text-red-500">*</span>
                 </Label>
@@ -165,7 +165,7 @@ export function ApplicationForm({ open, onClose, onSave, editData, allApplicatio
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="space-y-1.5">
-                <Label htmlFor="date" className="flex items-center gap-1.5 text-gray-700">
+                <Label htmlFor="date" className="flex items-center gap-1.5 text-foreground">
                   <Calendar className="h-3.5 w-3.5" />
                   Дата отклика <span className="text-red-500">*</span>
                 </Label>
@@ -180,7 +180,7 @@ export function ApplicationForm({ open, onClose, onSave, editData, allApplicatio
               </div>
 
               <div className="space-y-1.5">
-                <Label className="flex items-center gap-1.5 text-gray-700">
+                <Label className="flex items-center gap-1.5 text-foreground">
                   <Send className="h-3.5 w-3.5" />
                   Способ отклика
                 </Label>
@@ -200,7 +200,7 @@ export function ApplicationForm({ open, onClose, onSave, editData, allApplicatio
               </div>
 
               <div className="space-y-1.5">
-                <Label className="flex items-center gap-1.5 text-gray-700">
+                <Label className="flex items-center gap-1.5 text-foreground">
                   <Flag className="h-3.5 w-3.5" />
                   Приоритет
                 </Label>
@@ -221,7 +221,7 @@ export function ApplicationForm({ open, onClose, onSave, editData, allApplicatio
             </div>
 
             <div className="space-y-1.5">
-              <Label className="flex items-center gap-1.5 text-gray-700">
+              <Label className="flex items-center gap-1.5 text-foreground">
                 <ListChecks className="h-3.5 w-3.5" />
                 Статус
               </Label>
@@ -241,13 +241,13 @@ export function ApplicationForm({ open, onClose, onSave, editData, allApplicatio
             </div>
           </div>
 
-          <div className="border-t border-gray-100" />
+          <div className="border-t border-border" />
 
           {/* Section: Next step & reminder */}
           <div className="space-y-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-[2fr_1fr]">
               <div className="space-y-1.5">
-                <Label htmlFor="next_step" className="flex items-center gap-1.5 text-gray-700">
+                <Label htmlFor="next_step" className="flex items-center gap-1.5 text-foreground">
                   <ListChecks className="h-3.5 w-3.5" />
                   Следующий шаг
                 </Label>
@@ -260,7 +260,7 @@ export function ApplicationForm({ open, onClose, onSave, editData, allApplicatio
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="next_step_date" className="flex items-center gap-1.5 text-gray-700">
+                <Label htmlFor="next_step_date" className="flex items-center gap-1.5 text-foreground">
                   <Bell className="h-3.5 w-3.5" />
                   Напоминание
                 </Label>
@@ -274,14 +274,14 @@ export function ApplicationForm({ open, onClose, onSave, editData, allApplicatio
             </div>
           </div>
 
-          <div className="border-t border-gray-100" />
+          <div className="border-t border-border" />
 
           {/* Section: Company details */}
           <div className="space-y-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">О компании и контактах</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-foreground-muted font-mono tracking-widest">О компании и контактах</p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="location" className="flex items-center gap-1.5 text-gray-700">
+                <Label htmlFor="location" className="flex items-center gap-1.5 text-foreground">
                   <MapPin className="h-3.5 w-3.5" />
                   Локация
                 </Label>
@@ -294,7 +294,7 @@ export function ApplicationForm({ open, onClose, onSave, editData, allApplicatio
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="company_url" className="flex items-center gap-1.5 text-gray-700">
+                <Label htmlFor="company_url" className="flex items-center gap-1.5 text-foreground">
                   <LinkIcon className="h-3.5 w-3.5" />
                   Сайт компании / ссылка на вакансию
                 </Label>
@@ -307,7 +307,7 @@ export function ApplicationForm({ open, onClose, onSave, editData, allApplicatio
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="contact_name" className="flex items-center gap-1.5 text-gray-700">
+                <Label htmlFor="contact_name" className="flex items-center gap-1.5 text-foreground">
                   <User className="h-3.5 w-3.5" />
                   Контактное лицо
                 </Label>
@@ -320,7 +320,7 @@ export function ApplicationForm({ open, onClose, onSave, editData, allApplicatio
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="contact_email" className="flex items-center gap-1.5 text-gray-700">
+                <Label htmlFor="contact_email" className="flex items-center gap-1.5 text-foreground">
                   <Mail className="h-3.5 w-3.5" />
                   Email контакта
                 </Label>
@@ -337,7 +337,7 @@ export function ApplicationForm({ open, onClose, onSave, editData, allApplicatio
             </div>
 
             <div className="space-y-1.5">
-              <Label className="flex items-center gap-1.5 text-gray-700">
+              <Label className="flex items-center gap-1.5 text-foreground">
                 <Wallet className="h-3.5 w-3.5" />
                 Зарплатная вилка
               </Label>
@@ -373,7 +373,7 @@ export function ApplicationForm({ open, onClose, onSave, editData, allApplicatio
             </div>
 
             <div className="space-y-1.5">
-              <Label className="flex items-center gap-1.5 text-gray-700">
+              <Label className="flex items-center gap-1.5 text-foreground">
                 <Tag className="h-3.5 w-3.5" />
                 Теги
               </Label>
@@ -386,12 +386,12 @@ export function ApplicationForm({ open, onClose, onSave, editData, allApplicatio
             </div>
           </div>
 
-          <div className="border-t border-gray-100" />
+          <div className="border-t border-border" />
 
           {/* Section: Notes */}
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="note" className="flex items-center gap-1.5 text-gray-700">
+              <Label htmlFor="note" className="flex items-center gap-1.5 text-foreground">
                 <StickyNote className="h-3.5 w-3.5" />
                 Короткая заметка
               </Label>
@@ -406,7 +406,7 @@ export function ApplicationForm({ open, onClose, onSave, editData, allApplicatio
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="jd" className="flex items-center gap-1.5 text-gray-700">
+              <Label htmlFor="jd" className="flex items-center gap-1.5 text-foreground">
                 <FileText className="h-3.5 w-3.5" />
                 Описание вакансии
               </Label>
@@ -422,7 +422,7 @@ export function ApplicationForm({ open, onClose, onSave, editData, allApplicatio
           </div>
         </div>
 
-        <DialogFooter className="gap-2 pt-2 border-t border-gray-100">
+        <DialogFooter className="gap-2 pt-2 border-t border-border">
           <Button variant="outline" onClick={onClose} disabled={saving}>
             Отмена
           </Button>

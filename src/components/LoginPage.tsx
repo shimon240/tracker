@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import { signInWithGoogle } from '@/hooks/useAuth'
+import { AmbientBackground } from '@/components/layout/AmbientBackground'
+import { SpotlightCard } from '@/components/layout/SpotlightCard'
+import { Button } from '@/components/ui/button'
 import { Briefcase, Loader2 } from 'lucide-react'
 
 export function LoginPage() {
@@ -18,47 +21,48 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        {/* Logo */}
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
+      <AmbientBackground />
+
+      <div className="relative z-10 w-full max-w-sm">
         <div className="flex flex-col items-center mb-8">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 shadow-lg mb-4">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-accent ds-shadow-accent mb-4">
             <Briefcase className="h-7 w-7 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">ApplyTrack</h1>
-          <p className="text-gray-500 text-sm mt-1">Трекер откликов на вакансии</p>
+          <h1 className="text-2xl font-semibold ds-text-gradient tracking-tight">ApplyTrack</h1>
+          <p className="text-foreground-muted text-sm mt-1">Трекер откликов на вакансии</p>
         </div>
 
-        {/* Card */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 space-y-6">
+        <SpotlightCard className="p-8 space-y-6">
           <div className="text-center">
-            <h2 className="text-lg font-semibold text-gray-900">Войдите в аккаунт</h2>
-            <p className="text-sm text-gray-500 mt-1">
+            <h2 className="text-lg font-semibold text-foreground tracking-tight">Войдите в аккаунт</h2>
+            <p className="text-sm text-foreground-muted mt-1">
               Все ваши отклики будут сохранены и доступны с любого устройства
             </p>
           </div>
 
           {error && (
-            <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2.5 text-sm text-red-700">
+            <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-sm text-red-300">
               {error}
             </div>
           )}
 
-          <button
+          <Button
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:border-gray-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
+            variant="secondary"
+            className="w-full h-11 gap-3"
           >
             {loading ? (
-              <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+              <Loader2 className="h-5 w-5 animate-spin text-foreground-muted" />
             ) : (
               <GoogleIcon />
             )}
             {loading ? 'Перенаправление...' : 'Войти через Google'}
-          </button>
-        </div>
+          </Button>
+        </SpotlightCard>
 
-        <p className="text-center text-xs text-gray-400 mt-6">
+        <p className="text-center text-xs text-foreground-muted mt-6">
           Данные хранятся в защищённой базе данных и доступны только вам
         </p>
       </div>

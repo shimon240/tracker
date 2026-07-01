@@ -36,14 +36,14 @@ export function KanbanCard({ application, onClick, dragging = false }: KanbanCar
       {...attributes}
       onClick={() => !isDragging && onClick()}
       className={cn(
-        'group w-full rounded-md border border-gray-200 bg-white px-2 py-1.5 shadow-sm transition-all hover:shadow-md hover:border-blue-200 cursor-grab active:cursor-grabbing select-none',
-        (isDragging || dragging) && 'opacity-50 ring-2 ring-blue-400'
+        'group w-full rounded-lg border border-border bg-gradient-to-b from-white/[0.08] to-white/[0.02] px-2 py-1.5 ds-shadow-card ds-transition hover:border-border-hover hover:ds-shadow-card-hover cursor-grab active:cursor-grabbing active:scale-[0.98] select-none',
+        (isDragging || dragging) && 'opacity-50 ring-2 ring-accent/50'
       )}
     >
-      <p className="text-xs font-semibold text-gray-900 truncate leading-tight">
+      <p className="text-xs font-semibold text-foreground truncate leading-tight">
         {application.company}
       </p>
-      <p className="text-[10px] text-gray-400 mt-0.5 truncate leading-tight">
+      <p className="text-[10px] text-foreground-muted mt-0.5 truncate leading-tight">
         {formatLastUpdate(application.updated_at)}
       </p>
     </div>

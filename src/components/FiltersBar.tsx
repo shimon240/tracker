@@ -39,7 +39,7 @@ export function FiltersBar({ filters, onFiltersChange, totalShown, totalAll, ava
       <div className="flex flex-wrap items-center gap-2">
         {/* Search */}
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground-muted pointer-events-none" />
           <Input
             placeholder="Поиск по компании, должности, заметкам..."
             value={filters.search}
@@ -49,7 +49,7 @@ export function FiltersBar({ filters, onFiltersChange, totalShown, totalAll, ava
           {filters.search && (
             <button
               onClick={() => onFiltersChange({ ...filters, search: '' })}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground ds-transition"
             >
               <X className="h-4 w-4" />
             </button>
@@ -61,9 +61,9 @@ export function FiltersBar({ filters, onFiltersChange, totalShown, totalAll, ava
           value={filters.status}
           onValueChange={v => onFiltersChange({ ...filters, status: v as ApplicationStatus | 'all' })}
         >
-          <SelectTrigger className={cn('w-44', filters.status !== 'all' && 'border-blue-400 bg-blue-50')}>
+          <SelectTrigger className={cn('w-44', filters.status !== 'all' && 'border-accent/40 bg-accent/10')}>
             <div className="flex items-center gap-1.5">
-              <SlidersHorizontal className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+              <SlidersHorizontal className="h-3.5 w-3.5 text-foreground-muted shrink-0" />
               <SelectValue placeholder="Все статусы" />
             </div>
           </SelectTrigger>
@@ -80,7 +80,7 @@ export function FiltersBar({ filters, onFiltersChange, totalShown, totalAll, ava
           value={filters.method}
           onValueChange={v => onFiltersChange({ ...filters, method: v as SubmissionMethod | 'all' })}
         >
-          <SelectTrigger className={cn('w-40', filters.method !== 'all' && 'border-blue-400 bg-blue-50')}>
+          <SelectTrigger className={cn('w-40', filters.method !== 'all' && 'border-accent/40 bg-accent/10')}>
             <SelectValue placeholder="Все способы" />
           </SelectTrigger>
           <SelectContent>
@@ -96,7 +96,7 @@ export function FiltersBar({ filters, onFiltersChange, totalShown, totalAll, ava
           value={filters.priority}
           onValueChange={v => onFiltersChange({ ...filters, priority: v as Priority | 'all' })}
         >
-          <SelectTrigger className={cn('w-36', filters.priority !== 'all' && 'border-blue-400 bg-blue-50')}>
+          <SelectTrigger className={cn('w-36', filters.priority !== 'all' && 'border-accent/40 bg-accent/10')}>
             <SelectValue placeholder="Приоритет" />
           </SelectTrigger>
           <SelectContent>
@@ -113,9 +113,9 @@ export function FiltersBar({ filters, onFiltersChange, totalShown, totalAll, ava
             value={filters.tag}
             onValueChange={v => onFiltersChange({ ...filters, tag: v })}
           >
-            <SelectTrigger className={cn('w-36', filters.tag !== 'all' && 'border-blue-400 bg-blue-50')}>
+            <SelectTrigger className={cn('w-36', filters.tag !== 'all' && 'border-accent/40 bg-accent/10')}>
               <div className="flex items-center gap-1.5">
-                <Tag className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                <Tag className="h-3.5 w-3.5 text-foreground-muted shrink-0" />
                 <SelectValue placeholder="Теги" />
               </div>
             </SelectTrigger>
@@ -130,7 +130,7 @@ export function FiltersBar({ filters, onFiltersChange, totalShown, totalAll, ava
 
         {/* Reset */}
         {hasActiveFilters && (
-          <Button variant="ghost" size="sm" onClick={reset} className="gap-1.5 text-gray-500 shrink-0">
+          <Button variant="ghost" size="sm" onClick={reset} className="gap-1.5 text-foreground-muted shrink-0">
             <X className="h-3.5 w-3.5" />
             Сбросить
           </Button>
@@ -138,7 +138,7 @@ export function FiltersBar({ filters, onFiltersChange, totalShown, totalAll, ava
       </div>
 
       {/* Results count */}
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-foreground-muted font-mono tracking-wider">
         {totalShown === totalAll
           ? `${totalAll} ${pluralize(totalAll, 'отклик', 'отклика', 'откликов')}`
           : `Показано ${totalShown} из ${totalAll}`}

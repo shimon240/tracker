@@ -3,6 +3,8 @@ import type { Application, ApplicationStatus, FilterState, SortDirection, SortFi
 import { useApplications, useFilteredApplications, useAllTags } from '@/hooks/useApplications'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/useToast'
+import { AmbientBackground } from '@/components/layout/AmbientBackground'
+import { SpotlightCard } from '@/components/layout/SpotlightCard'
 import { StatsCards } from '@/components/StatsCards'
 import { FiltersBar } from '@/components/FiltersBar'
 import { ApplicationTable } from '@/components/ApplicationTable'
@@ -34,9 +36,10 @@ export default function App() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3 text-gray-400">
-          <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <AmbientBackground />
+        <div className="relative z-10 flex flex-col items-center gap-3 text-foreground-muted">
+          <Loader2 className="h-8 w-8 animate-spin text-accent" />
           <p className="text-sm">Загрузка...</p>
         </div>
       </div>
@@ -204,23 +207,26 @@ function Dashboard({ user }: { user: NonNullable<ReturnType<typeof useAuth>['use
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-gray-50">
+      <div className="relative min-h-screen">
+        <AmbientBackground />
+
+        <div className="relative z-10">
         {/* Header */}
-        <header className="sticky top-0 z-40 border-b border-gray-200 bg-white/95 backdrop-blur-sm shadow-sm">
+        <header className="sticky top-0 z-40 border-b border-border bg-background-base/80 backdrop-blur-xl">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 shadow-sm">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-accent ds-shadow-accent">
                 <Briefcase className="h-4 w-4 text-white" />
               </div>
               <div>
-                <h1 className="text-base font-bold text-gray-900 leading-none">ApplyTrack</h1>
-                <p className="text-xs text-gray-500 leading-none mt-0.5">Трекер откликов</p>
+                <h1 className="text-base font-semibold text-foreground leading-none tracking-tight">ApplyTrack</h1>
+                <p className="text-xs text-foreground-muted leading-none mt-0.5 font-mono tracking-widest uppercase">Трекер</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              {loading && <Loader2 className="h-4 w-4 text-gray-400 animate-spin" />}
-              <Button onClick={handleAdd} className="gap-1.5 shadow-sm" size="sm" disabled={loading}>
+              {loading && <Loader2 className="h-4 w-4 text-foreground-muted animate-spin" />}
+              <Button onClick={handleAdd} className="gap-1.5" size="sm" disabled={loading}>
                 <Plus className="h-4 w-4" />
                 <span className="hidden sm:inline">Добавить отклик</span>
                 <span className="sm:hidden">Добавить</span>
@@ -233,12 +239,12 @@ function Dashboard({ user }: { user: NonNullable<ReturnType<typeof useAuth>['use
         {/* Main content */}
         <main className="mx-auto max-w-7xl space-y-5 px-4 py-5 sm:px-6">
           {error && (
-            <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="flex items-center gap-3 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span className="flex-1">{error}</span>
               <button
                 onClick={() => window.location.reload()}
-                className="inline-flex items-center gap-1.5 text-red-600 hover:text-red-800 font-medium"
+                className="inline-flex items-center gap-1.5 text-red-200 hover:text-red-100 font-medium ds-transition"
               >
                 <RefreshCw className="h-3.5 w-3.5" />
                 Обновить
@@ -250,10 +256,10 @@ function Dashboard({ user }: { user: NonNullable<ReturnType<typeof useAuth>['use
             <div className="space-y-5">
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="h-20 rounded-xl border border-gray-100 bg-white animate-pulse" />
+                  <div key={i} className="h-20 rounded-2xl border border-border bg-surface animate-pulse" />
                 ))}
               </div>
-              <div className="h-64 rounded-xl border border-gray-200 bg-white animate-pulse" />
+              <div className="h-64 rounded-2xl border border-border bg-surface animate-pulse" />
             </div>
           ) : (
             <>
@@ -265,7 +271,7 @@ function Dashboard({ user }: { user: NonNullable<ReturnType<typeof useAuth>['use
 
               <RemindersPanel applications={applications} onSelect={handleView} />
 
-              <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm space-y-4">
+              <SpotlightCard className="p-4 space-y-4" interactive={false}>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <Tabs value={view} onValueChange={v => setView(v as ViewMode)}>
                     <TabsList>
@@ -344,7 +350,7 @@ function Dashboard({ user }: { user: NonNullable<ReturnType<typeof useAuth>['use
                     )}
                   </>
                 )}
-              </div>
+              </SpotlightCard>
             </>
           )}
         </main>
@@ -367,6 +373,7 @@ function Dashboard({ user }: { user: NonNullable<ReturnType<typeof useAuth>['use
           onUnarchive={handleUnarchive}
           onStatusChange={handleStatusChange}
         />
+        </div>
       </div>
     </TooltipProvider>
   )
