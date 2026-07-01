@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:clean": "rm -rf node_modules/.vite && vite",
+    "dev:restart": "sh -c 'lsof -ti:5173,5174 2>/dev/null | xargs kill -9 2>/dev/null || true; rm -rf node_modules/.vite; vite'",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview"

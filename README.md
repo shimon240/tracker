@@ -52,6 +52,12 @@ npm install
 npm run dev
 ```
 
+Если сервер не стартует (порт занят или белый экран):
+
+```bash
+npm run dev:restart
+```
+
 Создайте файл `.env.local` в корне проекта:
 
 ```
@@ -64,21 +70,20 @@ VITE_APP_URL=http://localhost:5173
 
 ### Если не открывается
 
-1. Убедитесь, что сервер запущен — в терминале должно быть `VITE ... ready` и адрес `http://localhost:5173/`.
-2. **Белый экран** — очистите кэш Vite и перезапустите:
+1. Убедитесь, что сервер запущен — в терминале должно быть `VITE ... ready` и адрес `http://localhost:5173/` (или другой порт, если 5173 занят).
+2. **Не запускается / Port is already in use** — одна команда:
+   ```bash
+   npm run dev:restart
+   ```
+3. **Белый экран** — очистите кэш Vite:
    ```bash
    npm run dev:clean
    ```
    Затем обновите страницу (Ctrl+Shift+R / Cmd+Shift+R).
-3. Используйте порт **5173**, не 5174. Если порт занят:
-   ```bash
-   lsof -ti:5173 | xargs kill -9
-   npm run dev
-   ```
-3. Создайте `.env.local` (скопируйте из `.env.example`) — без него приложение покажет страницу с инструкцией.
-4. В Supabase Dashboard → Authentication → URL Configuration добавьте:
+4. Создайте `.env.local` (скопируйте из `.env.example`) — без него приложение покажет страницу с инструкцией.
+5. В Supabase Dashboard → Authentication → URL Configuration добавьте:
    - Site URL: `http://localhost:5173`
-   - Redirect URLs: `http://localhost:5173/**`
+   - Redirect URLs: `http://localhost:5173/**` и `http://localhost:5174/**`
 
 ## Сборка для продакшена
 
