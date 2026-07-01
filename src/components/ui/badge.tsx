@@ -3,18 +3,18 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const badgeVariants = cva(
-  'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+  'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ds-transition',
   {
     variants: {
       variant: {
-        default: 'border-transparent bg-blue-600 text-white hover:bg-blue-700',
-        secondary: 'border-transparent bg-gray-100 text-gray-800 hover:bg-gray-200',
-        destructive: 'border-transparent bg-red-100 text-red-700 hover:bg-red-200',
-        outline: 'text-gray-700',
-        success: 'border-transparent bg-green-100 text-green-700 hover:bg-green-200',
-        warning: 'border-transparent bg-amber-100 text-amber-700 hover:bg-amber-200',
-        info: 'border-transparent bg-sky-100 text-sky-700 hover:bg-sky-200',
-        purple: 'border-transparent bg-purple-100 text-purple-700 hover:bg-purple-200',
+        default: 'border-indigo-200 bg-indigo-50 text-indigo-700',
+        secondary: 'border-slate-200 bg-slate-100 text-slate-700',
+        destructive: 'border-red-200 bg-red-50 text-red-700',
+        outline: 'border-border text-foreground-muted',
+        success: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+        warning: 'border-amber-200 bg-amber-50 text-amber-700',
+        info: 'border-sky-200 bg-sky-50 text-sky-700',
+        purple: 'border-violet-200 bg-violet-50 text-violet-700',
       },
     },
     defaultVariants: {

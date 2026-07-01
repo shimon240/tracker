@@ -1,4 +1,6 @@
 import { Briefcase, Clock, Star, Trophy, XCircle, Archive } from 'lucide-react'
+import { SpotlightCard } from '@/components/layout/SpotlightCard'
+import { cn } from '@/lib/utils'
 
 interface StatsCardsProps {
   stats: {
@@ -19,9 +21,8 @@ interface StatCard {
   label: string
   value: number
   icon: React.ReactNode
-  bgColor: string
-  iconColor: string
-  textColor: string
+  accent: string
+  iconBg: string
 }
 
 export function StatsCards({ stats, showArchived, onToggleArchived }: StatsCardsProps) {
@@ -30,84 +31,73 @@ export function StatsCards({ stats, showArchived, onToggleArchived }: StatsCards
       label: 'Всего активных',
       value: stats.total,
       icon: <Briefcase className="h-5 w-5" />,
-      bgColor: 'bg-blue-50',
-      iconColor: 'text-blue-600',
-      textColor: 'text-blue-700',
+      accent: 'text-indigo-600',
+      iconBg: 'bg-indigo-50 text-indigo-600',
     },
     {
       label: 'В процессе',
       value: stats.inProgress,
       icon: <Clock className="h-5 w-5" />,
-      bgColor: 'bg-amber-50',
-      iconColor: 'text-amber-600',
-      textColor: 'text-amber-700',
+      accent: 'text-amber-600',
+      iconBg: 'bg-amber-50 text-amber-600',
     },
     {
       label: 'Офферы',
       value: stats.offers,
       icon: <Star className="h-5 w-5" />,
-      bgColor: 'bg-emerald-50',
-      iconColor: 'text-emerald-600',
-      textColor: 'text-emerald-700',
+      accent: 'text-emerald-600',
+      iconBg: 'bg-emerald-50 text-emerald-600',
     },
     {
       label: 'Принято',
       value: stats.accepted,
       icon: <Trophy className="h-5 w-5" />,
-      bgColor: 'bg-purple-50',
-      iconColor: 'text-purple-600',
-      textColor: 'text-purple-700',
+      accent: 'text-violet-600',
+      iconBg: 'bg-violet-50 text-violet-600',
     },
     {
       label: 'Отклонено',
       value: stats.rejected,
       icon: <XCircle className="h-5 w-5" />,
-      bgColor: 'bg-red-50',
-      iconColor: 'text-red-600',
-      textColor: 'text-red-700',
+      accent: 'text-red-600',
+      iconBg: 'bg-red-50 text-red-600',
     },
   ]
 
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
       {cards.map((card) => (
-        <div
-          key={card.label}
-          className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
-        >
+        <SpotlightCard key={card.label} className="p-4">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs font-medium text-gray-500">{card.label}</p>
-              <p className={`mt-1 text-2xl font-bold ${card.textColor}`}>{card.value}</p>
+              <p className="text-xs font-semibold text-foreground-muted">{card.label}</p>
+              <p className={cn('mt-1 text-2xl font-bold tracking-tight', card.accent)}>{card.value}</p>
             </div>
-            <div className={`rounded-lg p-2 ${card.bgColor}`}>
-              <span className={card.iconColor}>{card.icon}</span>
+            <div className={cn('rounded-xl p-2', card.iconBg)}>
+              {card.icon}
             </div>
           </div>
-        </div>
+        </SpotlightCard>
       ))}
 
-      <button
+      <SpotlightCard
+        interactive
+        className={cn('p-4 text-left cursor-pointer', showArchived && 'ring-2 ring-indigo-200')}
         onClick={onToggleArchived}
-        className={`rounded-xl border p-4 shadow-sm transition-all hover:shadow-md text-left ${
-          showArchived
-            ? 'border-gray-400 bg-gray-100'
-            : 'border-gray-100 bg-white hover:border-gray-200'
-        }`}
       >
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs font-medium text-gray-500">Архив</p>
-            <p className="mt-1 text-2xl font-bold text-gray-600">{stats.archived}</p>
+            <p className="text-xs font-semibold text-foreground-muted">Архив</p>
+            <p className="mt-1 text-2xl font-bold tracking-tight text-slate-600">{stats.archived}</p>
           </div>
-          <div className={`rounded-lg p-2 ${showArchived ? 'bg-gray-200' : 'bg-gray-50'}`}>
-            <Archive className="h-5 w-5 text-gray-500" />
+          <div className={cn('rounded-xl p-2', showArchived ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-50 text-slate-500')}>
+            <Archive className="h-5 w-5" />
           </div>
         </div>
         {showArchived && (
-          <p className="mt-1 text-xs text-gray-500 font-medium">Показан архив</p>
+          <p className="mt-1 text-xs text-indigo-600 font-semibold">Показан архив</p>
         )}
-      </button>
+      </SpotlightCard>
     </div>
   )
 }
