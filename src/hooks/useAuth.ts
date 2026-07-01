@@ -34,11 +34,10 @@ export function useAuth(): AuthState {
 }
 
 export async function signInWithGoogle() {
-  const appUrl = (import.meta.env.VITE_APP_URL as string | undefined) ?? window.location.origin
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: appUrl,
+      redirectTo: window.location.origin,
     },
   })
   if (error) throw error

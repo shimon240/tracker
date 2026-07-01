@@ -62,6 +62,19 @@ VITE_APP_URL=http://localhost:5173
 
 Откройте [http://localhost:5173](http://localhost:5173) в браузере.
 
+### Если не открывается
+
+1. Убедитесь, что сервер запущен — в терминале должно быть `VITE ... ready` и адрес `http://localhost:5173/`.
+2. Используйте порт **5173**, не 5174. Если порт занят:
+   ```bash
+   lsof -ti:5173 | xargs kill -9
+   npm run dev
+   ```
+3. Создайте `.env.local` (скопируйте из `.env.example`) — без него приложение покажет страницу с инструкцией.
+4. В Supabase Dashboard → Authentication → URL Configuration добавьте:
+   - Site URL: `http://localhost:5173`
+   - Redirect URLs: `http://localhost:5173/**`
+
 ## Сборка для продакшена
 
 ```bash
