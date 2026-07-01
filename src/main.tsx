@@ -2,13 +2,16 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import { EnvSetupPage } from '@/components/EnvSetupPage'
+import { BootstrapErrorPage } from '@/components/BootstrapErrorPage'
 
 const isConfigured = Boolean(
   import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY
 )
 
 async function bootstrap() {
-  const root = createRoot(document.getElementById('root')!)
+  const rootEl = document.getElementById('root')
+  if (!rootEl) throw new Error('Элемент #root не найден')
+  const root = createRoot(rootEl)
 
   if (!isConfigured) {
     root.render(
@@ -35,4 +38,12 @@ async function bootstrap() {
   )
 }
 
-bootstrap()
+bootstrap().catch(error => {
+  const rootEl = document.getElementById('root')
+  if (!rootEl) return
+  createRoot(rootEl).render(
+    <StrictMode>
+      <BootstrapErrorPage error={error} />
+    </StrictMode>
+  )
+})
