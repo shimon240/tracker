@@ -15,13 +15,13 @@ export function KanbanColumn({ status, applications, onCardClick }: KanbanColumn
   const cfg = STATUS_CONFIG[status]
 
   return (
-    <div className="flex w-72 shrink-0 flex-col rounded-xl bg-gray-50/70 border border-gray-100">
-      <div className="flex items-center justify-between px-3 py-2.5 border-b border-gray-100">
-        <div className="flex items-center gap-2">
-          <span className={cn('h-2 w-2 rounded-full', cfg.dotColor)} />
-          <span className="text-sm font-semibold text-gray-700">{cfg.label}</span>
+    <div className="flex w-28 shrink-0 flex-col rounded-lg bg-gray-50/70 border border-gray-100">
+      <div className="flex items-center justify-between gap-1 px-1.5 py-1.5 border-b border-gray-100 min-w-0">
+        <div className="flex items-center gap-1 min-w-0">
+          <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', cfg.dotColor)} />
+          <span className="text-[11px] font-semibold text-gray-700 truncate">{cfg.label}</span>
         </div>
-        <span className="text-xs font-medium text-gray-400 bg-white rounded-full px-1.5 py-0.5 border border-gray-100">
+        <span className="shrink-0 text-[10px] font-medium text-gray-400 bg-white rounded-full px-1 py-px border border-gray-100">
           {applications.length}
         </span>
       </div>
@@ -29,7 +29,7 @@ export function KanbanColumn({ status, applications, onCardClick }: KanbanColumn
       <div
         ref={setNodeRef}
         className={cn(
-          'flex-1 space-y-2 overflow-y-auto p-2 min-h-[120px] max-h-[calc(100vh-280px)] transition-colors rounded-b-xl',
+          'flex-1 space-y-1 overflow-y-auto p-1 min-h-[80px] max-h-[calc(100vh-280px)] transition-colors rounded-b-lg',
           isOver && 'bg-blue-50/70 ring-2 ring-inset ring-blue-200'
         )}
       >
@@ -37,7 +37,7 @@ export function KanbanColumn({ status, applications, onCardClick }: KanbanColumn
           <KanbanCard key={app.id} application={app} onClick={() => onCardClick(app)} />
         ))}
         {applications.length === 0 && (
-          <div className="flex h-20 items-center justify-center rounded-lg border border-dashed border-gray-200 text-xs text-gray-300">
+          <div className="flex h-12 items-center justify-center rounded border border-dashed border-gray-200 text-[10px] text-gray-300">
             Пусто
           </div>
         )}

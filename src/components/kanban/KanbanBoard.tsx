@@ -51,7 +51,7 @@ export function KanbanBoard({ applications, onCardClick, onStatusChange }: Kanba
 
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+      <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-thin">
         {STATUSES.map(status => (
           <KanbanColumn
             key={status}
@@ -64,7 +64,7 @@ export function KanbanBoard({ applications, onCardClick, onStatusChange }: Kanba
 
       <DragOverlay>
         {activeApp && (
-          <div className="w-72 rotate-1">
+          <div className="w-28 rotate-1">
             <KanbanCard application={activeApp} onClick={() => {}} dragging />
           </div>
         )}
