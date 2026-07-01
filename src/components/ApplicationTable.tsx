@@ -133,7 +133,7 @@ export function ApplicationTable({
 
   return (
     <>
-      <div className="rounded-2xl border border-border bg-surface/30 overflow-hidden ds-shadow-card">
+      <div className="rounded-xl border border-slate-100 bg-surface ds-shadow-soft overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm table-fixed">
             <colgroup>
@@ -142,13 +142,13 @@ export function ApplicationTable({
               ))}
             </colgroup>
             <thead>
-              <tr className="border-b border-border bg-surface/50">
+              <tr className="border-b border-border bg-slate-50/80">
                 {TABLE_COLUMNS.map(col => (
                   <th
                     key={col.key}
                     style={columnStyle(widths[col.key])}
                     className={cn(
-                      'relative px-4 py-3 text-left text-xs font-medium text-foreground-muted uppercase tracking-widest font-mono overflow-hidden',
+                      'relative px-4 py-3 text-left text-xs font-semibold text-foreground-muted uppercase tracking-wide overflow-hidden',
                       col.className,
                       col.sortable && 'cursor-pointer select-none hover:text-foreground'
                     )}
@@ -171,8 +171,8 @@ export function ApplicationTable({
                         aria-label={`Изменить ширину столбца ${col.label || col.key}`}
                         className={cn(
                           'absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none',
-                          'hover:bg-accent/60 active:bg-accent/80',
-                          resizing?.key === col.key && 'bg-accent/80'
+                          'hover:bg-indigo-400/60 active:bg-indigo-500/70',
+                          resizing?.key === col.key && 'bg-indigo-500/70'
                         )}
                         onMouseDown={event => {
                           event.preventDefault()
@@ -252,9 +252,9 @@ function ApplicationRow({ app, widths, onView, onEdit, onDelete, onArchive, onUn
   return (
     <tr
       className={cn(
-        'group hover:bg-accent/5 ds-transition cursor-pointer',
+        'group hover:bg-indigo-50/60 ds-transition cursor-pointer',
         app.archived && 'opacity-60',
-        selected && 'bg-accent/10'
+        selected && 'bg-indigo-50'
       )}
       onClick={() => onView(app)}
     >
@@ -263,14 +263,14 @@ function ApplicationRow({ app, widths, onView, onEdit, onDelete, onArchive, onUn
       </td>
 
       <td style={cell('company')} className="px-4 py-3 overflow-hidden">
-        <div className="font-medium text-foreground group-hover:text-accent-bright ds-transition leading-tight truncate">
+        <div className="font-medium text-foreground group-hover:text-indigo-600 ds-transition leading-tight truncate">
           {app.company}
         </div>
         <div className="text-foreground-muted text-xs mt-0.5 truncate">{app.position}</div>
         {app.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1 overflow-hidden">
             {app.tags.slice(0, 3).map(tag => (
-              <span key={tag} className="rounded-full bg-surface border border-border px-1.5 py-0.5 text-[10px] font-medium text-foreground-muted truncate max-w-full">
+              <span key={tag} className="rounded-full bg-slate-100 border border-slate-200 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 truncate max-w-full">
                 {tag}
               </span>
             ))}
@@ -288,10 +288,10 @@ function ApplicationRow({ app, widths, onView, onEdit, onDelete, onArchive, onUn
           <div
             className={cn(
               'inline-flex items-center gap-0.5 mt-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium max-w-full truncate',
-              dueStatus === 'overdue' && 'bg-red-500/15 text-red-300 border border-red-500/25',
-              dueStatus === 'today' && 'bg-orange-500/15 text-orange-300 border border-orange-500/25',
-              dueStatus === 'soon' && 'bg-amber-500/15 text-amber-300 border border-amber-500/25',
-              dueStatus === 'later' && 'bg-surface text-foreground-muted border border-border'
+              dueStatus === 'overdue' && 'bg-red-50 text-red-700 border border-red-200',
+              dueStatus === 'today' && 'bg-orange-50 text-orange-700 border border-orange-200',
+              dueStatus === 'soon' && 'bg-amber-50 text-amber-700 border border-amber-200',
+              dueStatus === 'later' && 'bg-slate-100 text-slate-600 border border-slate-200'
             )}
           >
             {dueStatus === 'overdue' ? <AlertTriangle className="h-2.5 w-2.5 shrink-0" /> : <Bell className="h-2.5 w-2.5 shrink-0" />}
@@ -301,7 +301,7 @@ function ApplicationRow({ app, widths, onView, onEdit, onDelete, onArchive, onUn
       </td>
 
       <td style={cell('method')} className="px-4 py-3 hidden md:table-cell overflow-hidden">
-        <span className="text-xs text-foreground-muted bg-surface border border-border rounded-full px-2 py-0.5 truncate inline-block max-w-full">
+        <span className="text-xs text-slate-600 bg-slate-100 border border-slate-200 rounded-full px-2 py-0.5 truncate inline-block max-w-full">
           {app.submission_method}
         </span>
       </td>
@@ -348,7 +348,7 @@ function ApplicationRow({ app, widths, onView, onEdit, onDelete, onArchive, onUn
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => onDelete(app)}
-              className="text-red-300 focus:text-red-200 focus:bg-red-500/10"
+              className="text-red-600 focus:text-red-700 focus:bg-red-50"
             >
               <Trash2 className="h-4 w-4" />
               Удалить

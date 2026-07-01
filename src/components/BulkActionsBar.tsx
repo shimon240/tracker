@@ -39,15 +39,15 @@ export function BulkActionsBar({
   if (selectedCount === 0) return null
 
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-accent/30 bg-accent/10 px-4 py-2.5">
-      <span className="text-sm font-medium text-accent-bright">
+    <div className="flex flex-wrap items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2.5">
+      <span className="text-sm font-semibold text-indigo-900">
         Выбрано: {selectedCount}
       </span>
 
       <div className="flex items-center gap-1.5 ml-2">
-        <ListChecks className="h-3.5 w-3.5 text-accent" />
+        <ListChecks className="h-3.5 w-3.5 text-indigo-600" />
         <Select onValueChange={v => onStatusChange(v as ApplicationStatus)}>
-          <SelectTrigger className="h-8 w-44 text-xs">
+          <SelectTrigger className="h-8 w-44 text-xs bg-white">
             <SelectValue placeholder="Изменить статус..." />
           </SelectTrigger>
           <SelectContent>
@@ -59,12 +59,12 @@ export function BulkActionsBar({
       </div>
 
       {showUnarchive ? (
-        <Button variant="outline" size="sm" onClick={onUnarchive} className="h-8 gap-1.5">
+        <Button variant="outline" size="sm" onClick={onUnarchive} className="h-8 gap-1.5 bg-white">
           <ArchiveRestore className="h-3.5 w-3.5" />
           Из архива
         </Button>
       ) : (
-        <Button variant="outline" size="sm" onClick={onArchive} className="h-8 gap-1.5">
+        <Button variant="outline" size="sm" onClick={onArchive} className="h-8 gap-1.5 bg-white">
           <Archive className="h-3.5 w-3.5" />
           В архив
         </Button>
@@ -74,13 +74,13 @@ export function BulkActionsBar({
         variant="outline"
         size="sm"
         onClick={() => setConfirmDelete(true)}
-        className="h-8 gap-1.5 text-red-300 border-red-500/30 hover:bg-red-500/10 hover:text-red-200"
+        className="h-8 gap-1.5 bg-white text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
       >
         <Trash2 className="h-3.5 w-3.5" />
         Удалить
       </Button>
 
-      <Button variant="ghost" size="sm" onClick={onClear} className="h-8 gap-1.5 ml-auto text-accent-bright">
+      <Button variant="ghost" size="sm" onClick={onClear} className="h-8 gap-1.5 ml-auto text-indigo-700">
         <X className="h-3.5 w-3.5" />
         Снять выделение
       </Button>

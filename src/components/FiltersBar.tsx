@@ -61,7 +61,7 @@ export function FiltersBar({ filters, onFiltersChange, totalShown, totalAll, ava
           value={filters.status}
           onValueChange={v => onFiltersChange({ ...filters, status: v as ApplicationStatus | 'all' })}
         >
-          <SelectTrigger className={cn('w-44', filters.status !== 'all' && 'border-accent/40 bg-accent/10')}>
+          <SelectTrigger className={cn('w-44', filters.status !== 'all' && 'border-indigo-300 bg-indigo-50')}>
             <div className="flex items-center gap-1.5">
               <SlidersHorizontal className="h-3.5 w-3.5 text-foreground-muted shrink-0" />
               <SelectValue placeholder="Все статусы" />
@@ -80,7 +80,7 @@ export function FiltersBar({ filters, onFiltersChange, totalShown, totalAll, ava
           value={filters.method}
           onValueChange={v => onFiltersChange({ ...filters, method: v as SubmissionMethod | 'all' })}
         >
-          <SelectTrigger className={cn('w-40', filters.method !== 'all' && 'border-accent/40 bg-accent/10')}>
+          <SelectTrigger className={cn('w-40', filters.method !== 'all' && 'border-indigo-300 bg-indigo-50')}>
             <SelectValue placeholder="Все способы" />
           </SelectTrigger>
           <SelectContent>
@@ -96,7 +96,7 @@ export function FiltersBar({ filters, onFiltersChange, totalShown, totalAll, ava
           value={filters.priority}
           onValueChange={v => onFiltersChange({ ...filters, priority: v as Priority | 'all' })}
         >
-          <SelectTrigger className={cn('w-36', filters.priority !== 'all' && 'border-accent/40 bg-accent/10')}>
+          <SelectTrigger className={cn('w-36', filters.priority !== 'all' && 'border-indigo-300 bg-indigo-50')}>
             <SelectValue placeholder="Приоритет" />
           </SelectTrigger>
           <SelectContent>
@@ -113,7 +113,7 @@ export function FiltersBar({ filters, onFiltersChange, totalShown, totalAll, ava
             value={filters.tag}
             onValueChange={v => onFiltersChange({ ...filters, tag: v })}
           >
-            <SelectTrigger className={cn('w-36', filters.tag !== 'all' && 'border-accent/40 bg-accent/10')}>
+            <SelectTrigger className={cn('w-36', filters.tag !== 'all' && 'border-indigo-300 bg-indigo-50')}>
               <div className="flex items-center gap-1.5">
                 <Tag className="h-3.5 w-3.5 text-foreground-muted shrink-0" />
                 <SelectValue placeholder="Теги" />
@@ -138,7 +138,7 @@ export function FiltersBar({ filters, onFiltersChange, totalShown, totalAll, ava
       </div>
 
       {/* Results count */}
-      <p className="text-xs text-foreground-muted font-mono tracking-wider">
+      <p className="text-xs text-foreground-muted font-medium">
         {totalShown === totalAll
           ? `${totalAll} ${pluralize(totalAll, 'отклик', 'отклика', 'откликов')}`
           : `Показано ${totalShown} из ${totalAll}`}

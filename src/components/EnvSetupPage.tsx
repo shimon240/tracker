@@ -13,11 +13,11 @@ export function EnvSetupPage() {
       <AmbientBackground />
       <SpotlightCard interactive={false} className="relative z-10 w-full max-w-lg p-8">
         <div className="flex items-start gap-3">
-          <AlertCircle className="h-6 w-6 text-amber-400 shrink-0 mt-0.5" />
+          <AlertCircle className="h-6 w-6 text-amber-500 shrink-0 mt-0.5" />
           <div>
-            <h1 className="text-lg font-semibold text-foreground">Нужна настройка окружения</h1>
+            <h1 className="text-lg font-bold text-foreground">Нужна настройка окружения</h1>
             <p className="text-sm text-foreground-muted mt-1">
-              Отсутствуют переменные Supabase в файле <code className="text-xs bg-surface border border-border px-1 py-0.5 rounded">.env.local</code>.
+              Отсутствуют переменные Supabase в файле <code className="text-xs bg-slate-100 border border-slate-200 px-1 py-0.5 rounded">.env.local</code>.
             </p>
           </div>
         </div>
@@ -28,8 +28,8 @@ export function EnvSetupPage() {
           </p>
         )}
 
-        <div className="mt-6 rounded-xl border border-border bg-surface/50 p-4">
-          <div className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+        <div className="mt-6 rounded-xl border border-slate-100 bg-slate-50 p-4">
+          <div className="flex items-center gap-2 text-sm font-semibold text-foreground mb-2">
             <FileText className="h-4 w-4" />
             Создайте файл <code>.env.local</code>:
           </div>
@@ -39,12 +39,6 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 VITE_APP_URL=http://localhost:5173`}
           </pre>
         </div>
-
-        <ol className="mt-6 space-y-2 text-sm text-foreground-muted list-decimal list-inside">
-          <li>Скопируйте <code className="text-xs bg-surface border border-border px-1 rounded">.env.example</code> в <code className="text-xs bg-surface border border-border px-1 rounded">.env.local</code></li>
-          <li>Вставьте URL и anon key из Supabase Dashboard</li>
-          <li>Перезапустите: <code className="text-xs bg-surface border border-border px-1 rounded">npm run dev</code></li>
-        </ol>
       </SpotlightCard>
     </div>
   )

@@ -100,32 +100,32 @@ export function AnalyticsView({ applications }: AnalyticsViewProps) {
           value={`${total > 0 ? Math.round((interviewStageCount / total) * 100) : 0}%`}
           description={`${interviewStageCount} из ${total}`}
           icon={<Target className="h-5 w-5" />}
-          bgColor="bg-amber-500/15 text-amber-300"
-          iconColor="text-amber-300"
+          bgColor="bg-amber-50 text-amber-600"
+          iconColor="text-amber-600"
         />
         <KpiCard
           label="Получили оффер"
           value={`${total > 0 ? Math.round(((offerCount + acceptedCount) / total) * 100) : 0}%`}
           description={`${offerCount + acceptedCount} из ${total}`}
           icon={<Award className="h-5 w-5" />}
-          bgColor="bg-emerald-500/15 text-emerald-300"
-          iconColor="text-emerald-300"
+          bgColor="bg-emerald-50 text-emerald-600"
+          iconColor="text-emerald-600"
         />
         <KpiCard
           label="Среднее время ответа"
           value={avgDaysToResponse !== null ? `${avgDaysToResponse} дн.` : '—'}
           description="от отклика до реакции"
           icon={<Clock className="h-5 w-5" />}
-          bgColor="bg-accent/15 text-accent-bright"
-          iconColor="text-accent-bright"
+          bgColor="bg-indigo-50 text-indigo-600"
+          iconColor="text-indigo-600"
         />
         <KpiCard
           label="Откликов всего"
           value={String(total)}
           description="активных откликов"
           icon={<TrendingUp className="h-5 w-5" />}
-          bgColor="bg-purple-500/15 text-purple-300"
-          iconColor="text-purple-300"
+          bgColor="bg-violet-50 text-violet-600"
+          iconColor="text-violet-600"
         />
       </div>
 
@@ -137,7 +137,7 @@ export function AnalyticsView({ applications }: AnalyticsViewProps) {
               label: f.stage,
               value: f.count,
               sublabel: `${f.percentOfTotal}%`,
-              color: '#5E6AD2',
+              color: '#4F46E5',
             }))}
             maxValue={total}
           />
@@ -158,7 +158,7 @@ export function AnalyticsView({ applications }: AnalyticsViewProps) {
 
         <Card title="Способы отклика">
           <HorizontalBarChart
-            data={methodBreakdown.map(m => ({ label: m.label, value: m.value, color: '#818cf8' }))}
+            data={methodBreakdown.map(m => ({ label: m.label, value: m.value, color: '#7C3AED' }))}
           />
         </Card>
       </div>
@@ -166,7 +166,7 @@ export function AnalyticsView({ applications }: AnalyticsViewProps) {
       {topCompanies.length > 0 && (
         <Card title="Топ компаний по количеству откликов">
           <HorizontalBarChart
-            data={topCompanies.map(c => ({ label: c.label, value: c.value, color: '#6872D9' }))}
+            data={topCompanies.map(c => ({ label: c.label, value: c.value, color: '#6366F1' }))}
           />
         </Card>
       )}

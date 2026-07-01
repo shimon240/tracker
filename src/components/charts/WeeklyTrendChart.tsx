@@ -18,19 +18,19 @@ export function WeeklyTrendChart({ data }: WeeklyTrendChartProps) {
     <div className="flex items-end gap-1.5 sm:gap-2 h-40">
       {data.map((d, idx) => (
         <div key={idx} className="flex-1 flex flex-col items-center gap-1.5 group">
-          <span className="text-[11px] font-medium text-accent-bright opacity-0 group-hover:opacity-100 ds-transition tabular-nums">
+          <span className="text-[11px] font-semibold text-indigo-600 opacity-0 group-hover:opacity-100 ds-transition tabular-nums">
             {d.value}
           </span>
           <div className="w-full flex-1 flex items-end">
             <div
-              className="w-full rounded-t-md bg-accent group-hover:bg-accent-bright ds-transition min-h-[3px]"
+              className="w-full rounded-t-md bg-gradient-to-t from-indigo-600 to-violet-500 group-hover:from-indigo-500 group-hover:to-violet-400 ds-transition min-h-[3px]"
               style={{
                 height: `${Math.max(2, (d.value / max) * 100)}%`,
-                boxShadow: '0 0 16px rgba(94,106,210,0.35)',
+                boxShadow: '0 4px 14px rgba(79,70,229,0.25)',
               }}
             />
           </div>
-          <span className="text-[10px] text-foreground-muted whitespace-nowrap font-mono">{d.label}</span>
+          <span className="text-[10px] text-foreground-muted whitespace-nowrap font-medium">{d.label}</span>
         </div>
       ))}
     </div>

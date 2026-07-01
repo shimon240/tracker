@@ -24,19 +24,19 @@ export function HorizontalBarChart({ data, maxValue, emptyMessage = 'Нет да
       {data.map(d => (
         <div key={d.label} className="space-y-1">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-medium text-foreground">{d.label}</span>
+            <span className="font-semibold text-foreground">{d.label}</span>
             <span className="text-foreground-muted tabular-nums">
               {d.value}
               {d.sublabel && <span className="text-foreground-subtle ml-1">{d.sublabel}</span>}
             </span>
           </div>
-          <div className="h-2 w-full rounded-full bg-surface overflow-hidden border border-border">
+          <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden border border-slate-100">
             <div
               className="h-full rounded-full ds-transition"
               style={{
                 width: `${max > 0 ? Math.max(2, (d.value / max) * 100) : 0}%`,
-                backgroundColor: d.color ?? '#5E6AD2',
-                boxShadow: '0 0 12px rgba(94,106,210,0.4)',
+                backgroundColor: d.color ?? '#4F46E5',
+                boxShadow: '0 0 12px rgba(79,70,229,0.25)',
               }}
             />
           </div>

@@ -36,8 +36,8 @@ export function KanbanCard({ application, onClick, dragging = false }: KanbanCar
       {...attributes}
       onClick={() => !isDragging && onClick()}
       className={cn(
-        'group w-full rounded-lg border border-border bg-gradient-to-b from-white/[0.08] to-white/[0.02] px-2 py-1.5 ds-shadow-card ds-transition hover:border-border-hover hover:ds-shadow-card-hover cursor-grab active:cursor-grabbing active:scale-[0.98] select-none',
-        (isDragging || dragging) && 'opacity-50 ring-2 ring-accent/50'
+        'group w-full rounded-lg border border-slate-100 bg-surface px-2 py-1.5 ds-shadow-soft ds-transition hover:-translate-y-0.5 hover:ds-shadow-card-hover hover:border-indigo-100 cursor-grab active:cursor-grabbing active:scale-[0.98] select-none',
+        (isDragging || dragging) && 'opacity-50 ring-2 ring-indigo-300'
       )}
     >
       <p className="text-xs font-semibold text-foreground truncate leading-tight">

@@ -123,7 +123,7 @@ export function ApplicationForm({ open, onClose, onSave, editData, allApplicatio
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
-            <Briefcase className="h-5 w-5 text-accent" />
+            <Briefcase className="h-5 w-5 text-indigo-600" />
             {editData ? 'Редактировать отклик' : 'Новый отклик'}
           </DialogTitle>
         </DialogHeader>

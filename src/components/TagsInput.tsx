@@ -29,17 +29,17 @@ export function TagsInput({ tags, onChange, suggestions = [], placeholder = 'Ð”Ð
 
   return (
     <div className="space-y-2">
-      <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-white/10 bg-input-bg px-2 py-1.5 min-h-9 focus-within:border-accent focus-within:shadow-[0_0_0_3px_rgb(94_106_210/0.2)] ds-transition">
+      <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-border bg-input-bg px-2 py-1.5 min-h-9 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/30 focus-within:ring-offset-1 ds-transition">
         {tags.map(tag => (
           <span
             key={tag}
-            className="inline-flex items-center gap-1 rounded-full bg-accent/15 border border-accent/30 px-2 py-0.5 text-xs font-medium text-accent-bright"
+            className="inline-flex items-center gap-1 rounded-full bg-indigo-50 border border-indigo-200 px-2 py-0.5 text-xs font-semibold text-indigo-700"
           >
             {tag}
             <button
               type="button"
               onClick={() => removeTag(tag)}
-              className="hover:text-foreground ds-transition"
+              className="hover:text-indigo-900 ds-transition"
             >
               <X className="h-3 w-3" />
             </button>
@@ -63,7 +63,7 @@ export function TagsInput({ tags, onChange, suggestions = [], placeholder = 'Ð”Ð
             <button
               type="button"
               onClick={() => addTag(input)}
-              className="inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2 py-0.5 text-xs text-foreground-muted hover:border-accent/40 hover:text-accent-bright ds-transition"
+              className="inline-flex items-center gap-1 rounded-full border border-dashed border-slate-300 px-2 py-0.5 text-xs text-slate-500 hover:border-indigo-400 hover:text-indigo-600 ds-transition"
             >
               <Plus className="h-3 w-3" />
               {input.trim()}
@@ -75,7 +75,7 @@ export function TagsInput({ tags, onChange, suggestions = [], placeholder = 'Ð”Ð
               type="button"
               onClick={() => addTag(s)}
               className={cn(
-                'inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2 py-0.5 text-xs text-foreground-muted hover:border-accent/40 hover:text-accent-bright ds-transition'
+                'inline-flex items-center gap-1 rounded-full border border-dashed border-slate-300 px-2 py-0.5 text-xs text-slate-500 hover:border-indigo-400 hover:text-indigo-600 ds-transition'
               )}
             >
               {s}

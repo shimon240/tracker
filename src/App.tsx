@@ -212,15 +212,17 @@ function Dashboard({ user }: { user: NonNullable<ReturnType<typeof useAuth>['use
 
         <div className="relative z-10">
         {/* Header */}
-        <header className="sticky top-0 z-40 border-b border-border bg-background-base/80 backdrop-blur-xl">
+        <header className="sticky top-0 z-40 border-b border-border bg-surface/80 backdrop-blur-xl ds-shadow-soft">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-accent ds-shadow-accent">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl ds-bg-gradient ds-shadow-button">
                 <Briefcase className="h-4 w-4 text-white" />
               </div>
               <div>
-                <h1 className="text-base font-semibold text-foreground leading-none tracking-tight">ApplyTrack</h1>
-                <p className="text-xs text-foreground-muted leading-none mt-0.5 font-mono tracking-widest uppercase">Трекер</p>
+                <h1 className="text-base font-bold text-foreground leading-none tracking-tight">
+                  Apply<span className="ds-text-gradient">Track</span>
+                </h1>
+                <p className="text-xs text-foreground-muted leading-none mt-0.5 font-medium">Трекер откликов</p>
               </div>
             </div>
 
@@ -239,12 +241,12 @@ function Dashboard({ user }: { user: NonNullable<ReturnType<typeof useAuth>['use
         {/* Main content */}
         <main className="mx-auto max-w-7xl space-y-5 px-4 py-5 sm:px-6">
           {error && (
-            <div className="flex items-center gap-3 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span className="flex-1">{error}</span>
               <button
                 onClick={() => window.location.reload()}
-                className="inline-flex items-center gap-1.5 text-red-200 hover:text-red-100 font-medium ds-transition"
+                className="inline-flex items-center gap-1.5 text-red-600 hover:text-red-800 font-semibold ds-transition"
               >
                 <RefreshCw className="h-3.5 w-3.5" />
                 Обновить
@@ -256,10 +258,10 @@ function Dashboard({ user }: { user: NonNullable<ReturnType<typeof useAuth>['use
             <div className="space-y-5">
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="h-20 rounded-2xl border border-border bg-surface animate-pulse" />
+                  <div key={i} className="h-20 rounded-xl border border-border bg-surface ds-shadow-soft animate-pulse" />
                 ))}
               </div>
-              <div className="h-64 rounded-2xl border border-border bg-surface animate-pulse" />
+              <div className="h-64 rounded-xl border border-border bg-surface ds-shadow-soft animate-pulse" />
             </div>
           ) : (
             <>

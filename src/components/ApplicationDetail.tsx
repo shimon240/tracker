@@ -144,7 +144,7 @@ export function ApplicationDetail({
             <div className="flex flex-wrap items-center gap-1.5">
               <Tag className="h-3.5 w-3.5 text-foreground-muted" />
               {application.tags.map(tag => (
-                <span key={tag} className="rounded-full bg-accent/15 border border-accent/30 text-accent-bright">
+                <span key={tag} className="rounded-full bg-indigo-50 border border-indigo-200 px-2 py-0.5 text-xs font-semibold text-indigo-700">
                   {tag}
                 </span>
               ))}
