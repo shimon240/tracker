@@ -91,3 +91,46 @@ VITE_APP_URL=http://localhost:5173
 npm run build
 npm run preview
 ```
+
+## Деплой на Vercel
+
+Проект — Vite SPA; в репозитории уже есть `vercel.json` (rewrite на `index.html`).
+
+### Вариант 1: через Vercel Dashboard (самый простой)
+
+1. Откройте [vercel.com/new](https://vercel.com/new) и импортируйте репозиторий `shimon240/tracker`.
+2. Выберите ветку `cursor/applytrack-pro-features-dd31` (или `main` после мержа).
+3. Framework Preset: **Vite** (определится автоматически).
+4. Добавьте переменные окружения:
+
+   | Переменная | Значение |
+   |------------|----------|
+   | `VITE_SUPABASE_URL` | `https://ufcnppoazxfcnmnozpyk.supabase.co` |
+   | `VITE_SUPABASE_ANON_KEY` | anon key из Supabase Dashboard |
+   | `VITE_APP_URL` | `https://<ваш-домен>.vercel.app` |
+
+5. Нажмите **Deploy**.
+
+### Вариант 2: через Cursor (Vercel MCP)
+
+1. Cursor → Settings → MCP → **Vercel** → подключите аккаунт.
+2. Попросите агента задеплоить снова — он сможет использовать MCP или CLI с токеном.
+
+### Вариант 3: GitHub Actions (CI)
+
+В настройках репозитория GitHub → Secrets добавьте:
+
+- `VERCEL_TOKEN` — [vercel.com/account/tokens](https://vercel.com/account/tokens)
+- `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` — из `.vercel/project.json` после `vercel link`
+- `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_APP_URL`
+
+Workflow: `.github/workflows/vercel-deploy.yml` (деплой при push).
+
+### После деплоя — Supabase Auth
+
+В [Supabase Dashboard](https://supabase.com/dashboard) → Authentication → URL Configuration:
+
+- **Site URL:** `https://<ваш-домен>.vercel.app`
+- **Redirect URLs:** `https://<ваш-домен>.vercel.app/**`
+
+В Google Cloud Console (OAuth) добавьте production redirect URI, если используете Google OAuth напрямую.
