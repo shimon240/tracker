@@ -21,6 +21,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { formatDateShort, getDueStatus } from '@/lib/dateHelpers'
+import { TABLE_COLUMNS, type TableColumnKey } from '@/lib/tableColumnConfig'
+import { useTableColumnWidths } from '@/hooks/useTableColumnWidths'
 import {
   ChevronUp,
   ChevronDown,
@@ -36,9 +38,10 @@ import {
   AlertTriangle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useState } from 'react'
+import { useCallback, useEffect, useState, type CSSProperties } from 'react'
 
 interface ApplicationTableProps {
+  userId: string
   applications: Application[]
   sortField: SortField
   sortDirection: SortDirection
@@ -54,22 +57,11 @@ interface ApplicationTableProps {
   onToggleSelectAll: () => void
 }
 
-interface Column {
-  key: SortField | 'actions' | 'method' | 'select' | 'priority'
-  label: string
-  sortable: boolean
-  className?: string
+interface ResizeState {
+  key: TableColumnKey
+  startX: number
+  startWidth: number
 }
-
-const COLUMNS: Column[] = [
-  { key: 'select', label: '', sortable: false, className: 'w-10' },
-  { key: 'company', label: 'Компания / Вакансия', sortable: true, className: 'min-w-[220px]' },
-  { key: 'priority', label: 'Приоритет', sortable: true, className: 'w-28 hidden sm:table-cell' },
-  { key: 'date_applied', label: 'Дата', sortable: true, className: 'w-28' },
-  { key: 'method', label: 'Способ', sortable: false, className: 'w-32 hidden md:table-cell' },
-  { key: 'status', label: 'Статус', sortable: true, className: 'w-44' },
-  { key: 'actions', label: '', sortable: false, className: 'w-10' },
-]
 
 function SortIcon({ field, sortField, sortDirection }: { field: SortField; sortField: SortField; sortDirection: SortDirection }) {
   if (field !== sortField) return <ChevronsUpDown className="h-3.5 w-3.5 text-gray-300" />
@@ -77,7 +69,12 @@ function SortIcon({ field, sortField, sortDirection }: { field: SortField; sortF
   return <ChevronDown className="h-3.5 w-3.5 text-blue-500" />
 }
 
+function columnStyle(width: number): CSSProperties {
+  return { width, minWidth: width, maxWidth: width }
+}
+
 export function ApplicationTable({
+  userId,
   applications,
   sortField,
   sortDirection,
@@ -92,6 +89,35 @@ export function ApplicationTable({
   onToggleSelectAll,
 }: ApplicationTableProps) {
   const [deleteTarget, setDeleteTarget] = useState<Application | null>(null)
+  const { widths, setColumnWidth } = useTableColumnWidths(userId)
+  const [resizing, setResizing] = useState<ResizeState | null>(null)
+
+  const handleResizeStart = useCallback((key: TableColumnKey, clientX: number) => {
+    setResizing({ key, startX: clientX, startWidth: widths[key] })
+  }, [widths])
+
+  useEffect(() => {
+    if (!resizing) return
+
+    const handleMouseMove = (event: MouseEvent) => {
+      const delta = event.clientX - resizing.startX
+      setColumnWidth(resizing.key, resizing.startWidth + delta)
+    }
+
+    const handleMouseUp = () => setResizing(null)
+
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+
+    return () => {
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [resizing, setColumnWidth])
 
   if (applications.length === 0) {
     return (
@@ -109,14 +135,20 @@ export function ApplicationTable({
     <>
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm table-fixed">
+            <colgroup>
+              {TABLE_COLUMNS.map(col => (
+                <col key={col.key} style={columnStyle(widths[col.key])} />
+              ))}
+            </colgroup>
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
-                {COLUMNS.map(col => (
+                {TABLE_COLUMNS.map(col => (
                   <th
                     key={col.key}
+                    style={columnStyle(widths[col.key])}
                     className={cn(
-                      'px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide',
+                      'relative px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide overflow-hidden',
                       col.className,
                       col.sortable && 'cursor-pointer select-none hover:text-gray-700'
                     )}
@@ -125,12 +157,30 @@ export function ApplicationTable({
                     {col.key === 'select' ? (
                       <Checkbox checked={allSelected} onCheckedChange={onToggleSelectAll} />
                     ) : (
-                      <div className="flex items-center gap-1">
-                        {col.label}
+                      <div className="flex items-center gap-1 pr-2 truncate">
+                        <span className="truncate">{col.label}</span>
                         {col.sortable && (
                           <SortIcon field={col.key as SortField} sortField={sortField} sortDirection={sortDirection} />
                         )}
                       </div>
+                    )}
+                    {col.resizable && (
+                      <div
+                        role="separator"
+                        aria-orientation="vertical"
+                        aria-label={`Изменить ширину столбца ${col.label || col.key}`}
+                        className={cn(
+                          'absolute right-0 top-0 z-10 h-full w-1.5 cursor-col-resize touch-none',
+                          'hover:bg-blue-400/60 active:bg-blue-500/70',
+                          resizing?.key === col.key && 'bg-blue-500/70'
+                        )}
+                        onMouseDown={event => {
+                          event.preventDefault()
+                          event.stopPropagation()
+                          handleResizeStart(col.key, event.clientX)
+                        }}
+                        onClick={event => event.stopPropagation()}
+                      />
                     )}
                   </th>
                 ))}
@@ -141,6 +191,7 @@ export function ApplicationTable({
                 <ApplicationRow
                   key={app.id}
                   app={app}
+                  widths={widths}
                   onView={onView}
                   onEdit={onEdit}
                   onDelete={setDeleteTarget}
@@ -183,6 +234,7 @@ export function ApplicationTable({
 
 interface ApplicationRowProps {
   app: Application
+  widths: Record<TableColumnKey, number>
   onView: (app: Application) => void
   onEdit: (app: Application) => void
   onDelete: (app: Application) => void
@@ -192,9 +244,10 @@ interface ApplicationRowProps {
   onToggleSelect: () => void
 }
 
-function ApplicationRow({ app, onView, onEdit, onDelete, onArchive, onUnarchive, selected, onToggleSelect }: ApplicationRowProps) {
+function ApplicationRow({ app, widths, onView, onEdit, onDelete, onArchive, onUnarchive, selected, onToggleSelect }: ApplicationRowProps) {
   const dateFormatted = formatDateShort(app.date_applied)
   const dueStatus = getDueStatus(app.next_step_date, app.status)
+  const cell = (key: TableColumnKey) => columnStyle(widths[key])
 
   return (
     <tr
@@ -205,21 +258,19 @@ function ApplicationRow({ app, onView, onEdit, onDelete, onArchive, onUnarchive,
       )}
       onClick={() => onView(app)}
     >
-      {/* Select */}
-      <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
+      <td style={cell('select')} className="px-4 py-3 overflow-hidden" onClick={e => e.stopPropagation()}>
         <Checkbox checked={selected} onCheckedChange={onToggleSelect} />
       </td>
 
-      {/* Company / Position */}
-      <td className="px-4 py-3">
-        <div className="font-medium text-gray-900 group-hover:text-blue-700 transition-colors leading-tight">
+      <td style={cell('company')} className="px-4 py-3 overflow-hidden">
+        <div className="font-medium text-gray-900 group-hover:text-blue-700 transition-colors leading-tight truncate">
           {app.company}
         </div>
-        <div className="text-gray-500 text-xs mt-0.5 line-clamp-1">{app.position}</div>
+        <div className="text-gray-500 text-xs mt-0.5 truncate">{app.position}</div>
         {app.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-1">
+          <div className="flex flex-wrap gap-1 mt-1 overflow-hidden">
             {app.tags.slice(0, 3).map(tag => (
-              <span key={tag} className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500">
+              <span key={tag} className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 truncate max-w-full">
                 {tag}
               </span>
             ))}
@@ -227,47 +278,42 @@ function ApplicationRow({ app, onView, onEdit, onDelete, onArchive, onUnarchive,
         )}
       </td>
 
-      {/* Priority */}
-      <td className="px-4 py-3 hidden sm:table-cell">
+      <td style={cell('priority')} className="px-4 py-3 hidden sm:table-cell overflow-hidden">
         <PriorityBadge priority={app.priority} />
       </td>
 
-      {/* Date */}
-      <td className="px-4 py-3">
-        <div className="text-gray-800 font-medium tabular-nums">{dateFormatted}</div>
+      <td style={cell('date_applied')} className="px-4 py-3 overflow-hidden">
+        <div className="text-gray-800 font-medium tabular-nums truncate">{dateFormatted}</div>
         {dueStatus !== 'none' && (
           <div
             className={cn(
-              'inline-flex items-center gap-0.5 mt-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium',
+              'inline-flex items-center gap-0.5 mt-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium max-w-full truncate',
               dueStatus === 'overdue' && 'bg-red-100 text-red-700',
               dueStatus === 'today' && 'bg-orange-100 text-orange-700',
               dueStatus === 'soon' && 'bg-amber-100 text-amber-700',
               dueStatus === 'later' && 'bg-gray-100 text-gray-500'
             )}
           >
-            {dueStatus === 'overdue' ? <AlertTriangle className="h-2.5 w-2.5" /> : <Bell className="h-2.5 w-2.5" />}
-            {formatDateShort(app.next_step_date)}
+            {dueStatus === 'overdue' ? <AlertTriangle className="h-2.5 w-2.5 shrink-0" /> : <Bell className="h-2.5 w-2.5 shrink-0" />}
+            <span className="truncate">{formatDateShort(app.next_step_date)}</span>
           </div>
         )}
       </td>
 
-      {/* Method */}
-      <td className="px-4 py-3 hidden md:table-cell">
-        <span className="text-xs text-gray-600 bg-gray-100 rounded-full px-2 py-0.5">
+      <td style={cell('method')} className="px-4 py-3 hidden md:table-cell overflow-hidden">
+        <span className="text-xs text-gray-600 bg-gray-100 rounded-full px-2 py-0.5 truncate inline-block max-w-full">
           {app.submission_method}
         </span>
       </td>
 
-      {/* Status */}
-      <td className="px-4 py-3">
+      <td style={cell('status')} className="px-4 py-3 overflow-hidden">
         <StatusBadge status={app.status} />
         {app.next_step && (
-          <div className="text-xs text-gray-400 mt-1 line-clamp-1">{app.next_step}</div>
+          <div className="text-xs text-gray-400 mt-1 truncate">{app.next_step}</div>
         )}
       </td>
 
-      {/* Actions */}
-      <td className="px-2 py-3" onClick={e => e.stopPropagation()}>
+      <td style={cell('actions')} className="px-2 py-3 overflow-hidden" onClick={e => e.stopPropagation()}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

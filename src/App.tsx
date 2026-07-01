@@ -317,6 +317,7 @@ function Dashboard({ user }: { user: NonNullable<ReturnType<typeof useAuth>['use
                         />
 
                         <ApplicationTable
+                          userId={user.id}
                           applications={filteredApps}
                           sortField={sortField}
                           sortDirection={sortDirection}
