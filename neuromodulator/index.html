@@ -79,6 +79,56 @@
 
   select.themed, input.themed{background:#0f172a;border:1px solid #334155;color:#e2e8f0;}
   .scroll-thin{scrollbar-width:thin;scrollbar-color:#334155 #0f172a;}
+
+  /* ================= ЗОНЫ НЕЙРОМЕДИАТОРОВ (0–400%) ================= */
+  .zone-strip{position:relative;width:100%;height:6px;border-radius:3px;margin-top:5px;}
+  .zone-strip-bg{
+    position:absolute;inset:0;border-radius:3px;opacity:.6;
+    /* 0-10%=<40 красная | 10-17.5%=40-70 жёлтая | 17.5-32.5%=70-130 зелёная (норма)
+       | 32.5-62.5%=130-250 жёлтая | 62.5-100%=>250 красная (доли от диапазона 0–400%) */
+    background:linear-gradient(to right,
+      #ef4444 0%, #ef4444 10%,
+      #eab308 10%, #eab308 17.5%,
+      #22c55e 17.5%, #22c55e 32.5%,
+      #eab308 32.5%, #eab308 62.5%,
+      #ef4444 62.5%, #ef4444 100%);
+  }
+  .zone-marker{
+    position:absolute;top:-3px;width:2px;height:12px;background:#fff;border-radius:1px;
+    box-shadow:0 0 4px rgba(255,255,255,.9);transform:translateX(-1px);transition:left .3s ease;
+  }
+  .nt-warn-icon{font-size:11px;line-height:1;display:none;}
+  .nt-col.zone-yellow .nt-warn-icon{display:inline;color:#eab308;}
+  .nt-col.zone-red .nt-warn-icon{display:inline;color:#ef4444;animation:blinkWarn 1s infinite;}
+  @keyframes blinkWarn{0%,100%{opacity:1;}50%{opacity:.25;}}
+  .nt-col.zone-yellow .nt-value{color:#eab308;}
+  .nt-col.zone-red .nt-value{color:#ef4444;}
+
+  .nt-col.zone-yellow .vslider-box input[type=range]::-webkit-slider-thumb{box-shadow:0 0 10px #eab308;}
+  .nt-col.zone-yellow .vslider-box input[type=range]::-moz-range-thumb{box-shadow:0 0 10px #eab308;}
+  .nt-col.zone-red .vslider-box input[type=range]::-webkit-slider-thumb{box-shadow:0 0 16px #ef4444;animation:thumbPulse 1s infinite;}
+  .nt-col.zone-red .vslider-box input[type=range]::-moz-range-thumb{box-shadow:0 0 16px #ef4444;animation:thumbPulse 1s infinite;}
+  @keyframes thumbPulse{0%,100%{box-shadow:0 0 10px #ef4444;}50%{box-shadow:0 0 22px #ef4444;}}
+
+  /* ================= БАННЕР КРИТИЧЕСКОЙ ЗОНЫ ================= */
+  #criticalBanner{
+    display:none;align-items:center;gap:6px;font-size:11px;white-space:nowrap;
+    background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.5);color:#fecaca;
+    padding:4px 10px;border-radius:999px;animation:bannerPulse 2s infinite;
+  }
+  #criticalBanner.show{display:inline-flex;}
+  @keyframes bannerPulse{0%,100%{box-shadow:0 0 0 rgba(239,68,68,0);}50%{box-shadow:0 0 10px rgba(239,68,68,.6);}}
+
+  /* ================= ПСИХОТИЧЕСКАЯ ЭСКАЛАЦИЯ В SVG ================= */
+  @keyframes psychoticPulse{
+    0%,100%{ filter: drop-shadow(0 0 6px var(--dopamine)); }
+    50%{ filter: drop-shadow(0 0 20px var(--dopamine)) drop-shadow(0 0 8px #ef4444); }
+  }
+  .psychotic-pulse{ animation: psychoticPulse 1.1s ease-in-out infinite; }
+
+  /* ================= ИНДЕКС ПСИХОТИЧЕСКОЙ НАГРУЗКИ ================= */
+  .psy-gauge-num{font-size:28px;font-weight:700;line-height:1;min-width:2.2ch;text-align:center;}
+  .psy-badge{font-size:11px;padding:2px 8px;border-radius:999px;display:inline-block;margin-top:4px;}
 </style>
 </head>
 <body class="bg-slate-900 text-slate-200 min-h-screen scroll-thin">
@@ -92,14 +142,24 @@
       </h1>
       <p class="text-xs text-slate-400">Интерактивная модель нейромедиаторов и психического состояния — образовательный инструмент</p>
     </div>
+    <span id="criticalBanner">⚠ Критическая зона — гипотетическая модель, не медицинская рекомендация</span>
     <div class="flex flex-wrap items-center gap-2">
       <select id="presetSelect" class="themed text-xs rounded-md px-2 py-1.5">
         <option value="">Пресеты…</option>
-        <option value="baseline">Базовый баланс</option>
-        <option value="adhd">Фокус и мотивация (ADHD-оптимизированное)</option>
-        <option value="anxiety">Тревожность</option>
-        <option value="anhedonia">Сниженная мотивация / ангедония</option>
-        <option value="stable">Хорошая эмоциональная стабильность</option>
+        <optgroup label="Обычные состояния">
+          <option value="baseline">Базовый баланс</option>
+          <option value="adhd">ADHD / низкий префронтальный норадреналин</option>
+          <option value="anxiety">Тревожность</option>
+          <option value="anhedonia">Сниженная мотивация / ангедония</option>
+          <option value="stable">Хорошая эмоциональная стабильность</option>
+        </optgroup>
+        <optgroup label="⚠ Экстремальные состояния (образовательно)">
+          <option value="stimulant_psychosis">Стимулятор-индуцированный психоз</option>
+          <option value="schizophrenia_like">Шизофреноподобное состояние</option>
+          <option value="severe_negative">Тяжёлая негативная симптоматика</option>
+          <option value="serotonin_syndrome">Серотониновый синдром</option>
+          <option value="extreme_sedation">Экстремальная седация</option>
+        </optgroup>
       </select>
       <button id="btnRandom" class="text-xs px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Случайные значения</button>
       <button id="btnReset" class="text-xs px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Сбросить всё</button>
@@ -287,6 +347,24 @@
       <button id="btnExplain" class="mt-3 w-full text-xs px-3 py-2 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white">Объяснить текущий профиль</button>
       <div id="explainBox" class="hidden mt-2 text-sm text-slate-200 bg-slate-900/60 border border-slate-700 rounded-lg p-3 leading-relaxed fade-in"></div>
     </div>
+
+    <!-- PSYCHOTIC SPECTRUM: естественное расширение модели для экстремальных уровней НТ -->
+    <div class="bg-slate-800/60 border border-slate-800 rounded-xl p-4">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-sm font-semibold text-slate-200">Психотический спектр</h2>
+        <span class="text-slate-500 tooltip">ⓘ<span class="tip">Малоактивен в норме (70–130% для всех НТ), резко растёт нелинейно при экстремальных уровнях — см. «О модели».</span></span>
+      </div>
+      <div class="flex items-center gap-3 mb-3">
+        <div class="psy-gauge-num" id="psyOverallNum">2</div>
+        <div class="flex-1">
+          <p class="text-[11px] text-slate-400 mb-1">Общий индекс психотической нагрузки</p>
+          <div class="bar-track"><div id="psyOverallBar" class="bar-fill" style="width:2%;background:#22c55e;"></div></div>
+          <span id="psyOverallBadge" class="psy-badge" style="background:rgba(34,197,94,.15);color:#22c55e;">Норма</span>
+        </div>
+      </div>
+      <div id="psyBarsWrap" class="flex flex-col gap-2.5"></div>
+      <p id="psyClinicalNote" class="text-xs text-slate-400 mt-3 leading-relaxed"></p>
+    </div>
   </section>
 </main>
 
@@ -306,11 +384,23 @@
       объёмная (внесинаптическая) передача, сложнейшие обратные связи и огромные индивидуальные различия.
       Ни один параметр психики не определяется одним веществом.
     </p>
-    <p class="text-sm text-slate-300 leading-relaxed">
+    <p class="text-sm text-slate-300 leading-relaxed mb-2">
       Модель предназначена <b>только для построения интуиции</b> об общих принципах психофармакологии
       (например, почему «высокий дофамин» не всегда означает хорошее настроение) — а не для клинических
       выводов, самодиагностики или подбора терапии.
     </p>
+    <div class="border border-red-500/40 bg-red-500/10 rounded-lg p-3 mt-3">
+      <p class="text-sm text-red-200 leading-relaxed font-semibold mb-1">⚠ Важное предупреждение о блоке «Психотический спектр»</p>
+      <p class="text-sm text-red-100/90 leading-relaxed">
+        Эта модель сильно упрощена. Реальные психотические состояния возникают при сложном взаимодействии
+        множества систем (в первую очередь гипофункция глутамата/NMDA-рецепторов, дофаминовая дисрегуляция,
+        нейровоспаление, генетика и множество других факторов). Экстремальные значения слайдеров (за пределами
+        70–130%, особенно за пределами 40% и 250%) показаны <b>исключительно в образовательных целях</b>, чтобы
+        проиллюстрировать общие принципы (упрощённую дофаминовую гипотезу шизофрении и модели медикаментозных
+        психозов). Самостоятельное воспроизведение таких состояний в реальности крайне опасно и требует
+        немедленной медицинской помощи — эта модель не является диагностическим или медицинским инструментом.
+      </p>
+    </div>
   </div>
 </div>
 
@@ -342,6 +432,12 @@ const PARAM_LABELS = {
   focus:'Фокус и исполн. функции', regulation:'Эмоциональная регуляция', energy:'Энергия и бодрость'
 };
 const PARAM_ORDER = ['mood','anxiety','motivation','focus','regulation','energy'];
+
+// --- Психотический спектр: параметры, малоактивные в норме, резко растущие на экстремумах ---
+const PSY_LABELS = {
+  positive:'Позитивные симптомы', negative:'Негативные симптомы', disorganization:'Дезорганизация мышления'
+};
+const PSY_ORDER = ['positive','negative','disorganization'];
 
 const REGION_INFO = {
   'region-pfc': { title:'Префронтальная кора (PFC)', nts:['dopamine','norepinephrine'],
@@ -417,7 +513,13 @@ const PRESETS = {
   adhd:     { dopamine:130, serotonin:100, norepinephrine:150, gaba:90 },
   anxiety:  { dopamine:110, serotonin:60,  norepinephrine:160, gaba:50 },
   anhedonia:{ dopamine:40,  serotonin:70,  norepinephrine:60,  gaba:110 },
-  stable:   { dopamine:100, serotonin:140, norepinephrine:90,  gaba:120 }
+  stable:   { dopamine:100, serotonin:140, norepinephrine:90,  gaba:120 },
+  // --- экстремальные / клинически вдохновлённые пресеты (см. computePsychoticSpectrum) ---
+  stimulant_psychosis: { dopamine:380, serotonin:90,  norepinephrine:300, gaba:20  },
+  schizophrenia_like:  { dopamine:360, serotonin:80,  norepinephrine:140, gaba:12  },
+  severe_negative:     { dopamine:15,  serotonin:60,  norepinephrine:50,  gaba:130 },
+  serotonin_syndrome:  { dopamine:110, serotonin:320, norepinephrine:260, gaba:70  },
+  extreme_sedation:    { dopamine:90,  serotonin:100, norepinephrine:40,  gaba:380 }
 };
 
 /* ============================================================
@@ -427,6 +529,8 @@ const state = { dopamine:100, serotonin:100, norepinephrine:100, gaba:100, sensi
 let selectedId = null;      // текущий выбранный регион/путь
 let pathFilter = 'all';     // 'all' | 'dopamine'
 let hideCortex = false;
+let presetAnimFrame = null; // id анимации плавного перехода слайдеров при выборе пресета
+let currentPsy = { positive:0, negative:0, disorganization:0, overall:0 }; // кэш последнего расчёта психотического спектра
 
 /* ============================================================
    РАСЧЁТ ПСИХИЧЕСКОГО СОСТОЯНИЯ
@@ -459,29 +563,156 @@ function computeState(){
 }
 
 /* ============================================================
+   ЗОНЫ НЕЙРОМЕДИАТОРОВ (0–400%)
+   green: 70–130% (норма) | yellow: 40–70% и 130–250% (отклонение) | red: <40% и >250% (критично)
+   ============================================================ */
+function ntZone(level){
+  if(level>=70 && level<=130) return 'green';
+  if(level<40 || level>250) return 'red';
+  return 'yellow';
+}
+function worstNtZone(){
+  const zones = NT_KEYS.map(nt=>ntZone(state[nt]));
+  if(zones.includes('red')) return 'red';
+  if(zones.includes('yellow')) return 'yellow';
+  return 'green';
+}
+
+/* ============================================================
+   ПСИХОТИЧЕСКИЙ СПЕКТР — нелинейная модель для экстремальных зон
+   ============================================================
+   Сильно упрощённая иллюстрация двух классических идей психофармакологии:
+
+   1) Дофаминовая гипотеза шизофрении (Howes & Kapur, 2009, упрощённо): избыточная
+      мезолимбическая дофаминовая передача связана с «аберрантной значимостью» стимулов
+      и позитивными симптомами (бред, галлюцинации, паранойя). Дефицит дофамина/исполнительного
+      тонуса в префронтальных цепях, напротив, ассоциируется с негативными и когнитивными
+      симптомами («гипофронтальность»). Здесь используется единый слайдер «Дофамин» как
+      грубый прокси для мезолимбической активности — модель не различает подтипы рецепторов
+      и регионы, поэтому «дефицит в PFC» частично аппроксимируется отдельным низким
+      диапазоном того же слайдера, а частично — перекрёстным членом с потерей ГАМК ниже.
+   2) ГАМК как главный тормозной медиатор нелинейно определяет, «срывается» ли система
+      в дезорганизацию: при его тяжёлом дефиците теряется тормозной контроль над
+      возбуждающими путями (риск дезорганизации/психоза максимален именно при сочетании
+      высокого дофамина И низкого ГАМК), а при его избытке — наступает седация и
+      эмоциональное уплощение.
+
+   Все параметры малоактивны (близки к 0) в пределах нормального диапазона (70–130%)
+   и растут строго нелинейно (через степенные "ramp/sharpen" функции) только за пределами
+   заметных отклонений — это НЕ клиническая шкала, а образовательная иллюстрация.
+   ============================================================ */
+
+// линейная рампа 0..1 между start и end (end может быть меньше start — для обратного направления)
+function ramp(value, start, end){
+  if(start === end) return value>=start ? 1 : 0;
+  return Math.max(0, Math.min(1, (value-start)/(end-start)));
+}
+// "заостряет" рампу степенной функцией — резче ускоряется по мере приближения к пределу
+function sharpen(t, power){ return Math.pow(Math.max(0,Math.min(1,t)), power); }
+
+function computePsychoticSpectrum(){
+  const d=state.dopamine, s=state.serotonin, n=state.norepinephrine, g=state.gaba;
+  const sens = state.sensitivity;
+
+  const dopHyper   = sharpen(ramp(d, 260, 400), 1.6); // мезолимбическая гиперактивность (>260%, резко к 400%)
+  const dopHypoPFC = sharpen(ramp(d, 50, 0), 1.4);    // прямой дефицит дофамина -> гипофронтальность (<50%, резко к 0%)
+  const gabaLoss   = sharpen(ramp(g, 40, 0), 1.5);    // потеря тормозного контроля (<40%, резко к 0%)
+  const gabaFlood  = sharpen(ramp(g, 300, 400), 1.3); // крайняя ГАМК-седация (>300%, резко к 400%)
+  const neHyper    = sharpen(ramp(n, 220, 400), 1.3); // норадренергическая гипервозбудимость (arousal/паранойя)
+  const serFlood   = sharpen(ramp(s, 260, 400), 1.3); // серотониновый избыток (серотониновый синдром: спутанность)
+
+  // Позитивные симптомы (галлюцинации, бред, паранойя, подозрительность):
+  // растут резко при дофаминовой гиперактивности; усиливаются потерей ГАМК-торможения
+  // и норадренергическим возбуждением (тревожно-параноидная окраска высокого arousal).
+  let positive = 3
+    + sens*70*dopHyper*(1 + 0.7*gabaLoss)
+    + sens*32*neHyper*dopHyper;
+
+  // Негативные симптомы (аволиция, ангедония, эмоциональное уплощение, снижение мотивации):
+  // растут при прямом дефиците дофамина и при крайней ГАМК-седации; дополнительно немного
+  // усиливаются при тяжёлой сочетанной дисрегуляции (высокий дофамин + потеря ГАМК-торможения),
+  // грубо приближая классический «гипер-мезолимбический / гипо-префронтальный» паттерн.
+  let negative = 3
+    + sens*78*dopHypoPFC
+    + sens*42*gabaFlood
+    + sens*55*dopHyper*gabaLoss;
+
+  // Дезорганизация мышления (спутанность, трудности концентрации и связной речи):
+  // главный драйвер — сочетание высокого дофамина и потери ГАМК-торможения; серотониновый
+  // избыток и крайняя седация тоже вносят вклад (спутанность иного генеза).
+  let disorganization = 2
+    + sens*85*dopHyper*gabaLoss
+    + sens*28*serFlood
+    + sens*18*gabaFlood;
+
+  positive = Math.max(0, Math.min(100, positive));
+  negative = Math.max(0, Math.min(100, negative));
+  disorganization = Math.max(0, Math.min(100, disorganization));
+  const overall = Math.max(0, Math.min(100, positive*0.4 + negative*0.3 + disorganization*0.3));
+
+  return { positive, negative, disorganization, overall };
+}
+
+function psyLevelMeta(v){
+  if(v<15) return { label:'Норма',        color:'#22c55e' };
+  if(v<40) return { label:'Погранично',   color:'#eab308' };
+  if(v<70) return { label:'Высокий риск', color:'#f97316' };
+  return   { label:'Критично',     color:'#ef4444' };
+}
+
+// Клиническая по тону формулировка для блока «Психотический спектр» —
+// намеренно похожа на предупреждение из окна «О модели».
+function buildPsychoticNote(psy){
+  if(psy.overall < 15){
+    return 'Психотические параметры в пределах базовой модели — выраженных отклонений не смоделировано.';
+  }
+  let lead;
+  if(psy.positive>=psy.negative && psy.positive>=psy.disorganization){
+    lead = `Критически высокий уровень дофамина${state.gaba<40?' в сочетании с низким ГАМК':''} моделирует состояние, близкое к острому психотическому эпизоду (бред, галлюцинации, паранойя).`;
+  } else if(psy.negative>=psy.disorganization){
+    lead = 'Модель показывает выраженную негативную симптоматику — апатию, эмоциональное уплощение и снижение мотивации, характерные для тяжёлой гипофункции дофаминовой/исполнительной системы либо крайней седации.';
+  } else {
+    lead = 'Модель показывает выраженную дезорганизацию мышления — спутанность и трудности с концентрацией и связной речью.';
+  }
+  if(psy.overall>=40){
+    lead += ' В реальности это требует немедленной медицинской помощи — это исключительно образовательная иллюстрация, а не диагноз и не рекомендация.';
+  }
+  return lead;
+}
+
+/* ============================================================
    UI: СЛАЙДЕРЫ
    ============================================================ */
 const slidersRow = document.getElementById('slidersRow');
 const NT_KEYS = ['dopamine','serotonin','norepinephrine','gaba'];
 NT_KEYS.forEach(nt=>{
   const col = document.createElement('div');
-  col.className = 'flex flex-col items-center gap-1.5 tooltip';
+  col.className = 'flex flex-col items-center gap-1.5 tooltip nt-col';
   col.innerHTML = `
     <div class="tip">${NT_ROLE[nt]}</div>
-    <span class="text-[11px] font-medium" style="color:${NT_COLORS[nt]}">${NT_LABELS[nt]}</span>
-    <span id="val-${nt}" class="text-sm font-semibold text-slate-100">100%</span>
+    <span class="text-[11px] font-medium flex items-center gap-1" style="color:${NT_COLORS[nt]}">${NT_LABELS[nt]}<span class="nt-warn-icon">⚠</span></span>
+    <span id="val-${nt}" class="text-sm font-semibold text-slate-100 nt-value">100%</span>
     <div class="vslider-box" style="--nt-color:${NT_COLORS[nt]}">
-      <input type="range" id="slider-${nt}" min="0" max="200" step="5" value="100">
+      <input type="range" id="slider-${nt}" min="0" max="400" step="5" value="100">
     </div>
-    <div class="flex gap-1 mt-1">
+    <div class="zone-strip" title="Зоны: <40% и >250% критично · 40–70% и 130–250% погранично · 70–130% норма">
+      <div class="zone-strip-bg"></div>
+      <div id="zonemark-${nt}" class="zone-marker" style="left:25%"></div>
+    </div>
+    <div class="flex gap-1 mt-1 flex-wrap justify-center">
       <button data-nt="${nt}" data-v="50" class="quickbtn text-[10px] px-1.5 py-0.5 rounded bg-slate-700 hover:bg-slate-600">50%</button>
       <button data-nt="${nt}" data-v="100" class="quickbtn text-[10px] px-1.5 py-0.5 rounded bg-slate-700 hover:bg-slate-600">100%</button>
       <button data-nt="${nt}" data-v="150" class="quickbtn text-[10px] px-1.5 py-0.5 rounded bg-slate-700 hover:bg-slate-600">150%</button>
+      <button data-nt="${nt}" data-v="300" class="quickbtn text-[10px] px-1.5 py-0.5 rounded bg-slate-700 hover:bg-slate-600">300%</button>
     </div>`;
   slidersRow.appendChild(col);
 });
+function stopPresetAnimation(){
+  if(presetAnimFrame){ cancelAnimationFrame(presetAnimFrame); presetAnimFrame = null; }
+}
 NT_KEYS.forEach(nt=>{
   document.getElementById(`slider-${nt}`).addEventListener('input', e=>{
+    stopPresetAnimation();
     state[nt] = Number(e.target.value);
     syncSliderUI(); render();
   });
@@ -489,14 +720,47 @@ NT_KEYS.forEach(nt=>{
 slidersRow.addEventListener('click', e=>{
   const btn = e.target.closest('.quickbtn');
   if(!btn) return;
+  stopPresetAnimation();
   state[btn.dataset.nt] = Number(btn.dataset.v);
   syncSliderUI(); render();
 });
 function syncSliderUI(){
+  let anyRed = false;
   NT_KEYS.forEach(nt=>{
-    document.getElementById(`slider-${nt}`).value = state[nt];
-    document.getElementById(`val-${nt}`).textContent = state[nt] + '%';
+    const level = state[nt];
+    document.getElementById(`slider-${nt}`).value = level;
+    document.getElementById(`val-${nt}`).textContent = Math.round(level) + '%';
+    const zone = ntZone(level);
+    const col = document.getElementById(`slider-${nt}`).closest('.nt-col');
+    col.classList.remove('zone-green','zone-yellow','zone-red');
+    col.classList.add('zone-'+zone);
+    const marker = document.getElementById(`zonemark-${nt}`);
+    if(marker) marker.style.left = Math.max(0, Math.min(100, level/400*100)) + '%';
+    if(zone === 'red') anyRed = true;
   });
+  document.getElementById('criticalBanner').classList.toggle('show', anyRed);
+}
+
+/* Плавный анимированный переход слайдеров к целевым значениям пресета */
+function animateStateTo(target, duration=900){
+  stopPresetAnimation();
+  const start = { dopamine:state.dopamine, serotonin:state.serotonin, norepinephrine:state.norepinephrine, gaba:state.gaba };
+  const t0 = performance.now();
+  function step(now){
+    const t = Math.min(1, (now-t0)/duration);
+    const eased = t<0.5 ? 2*t*t : 1-Math.pow(-2*t+2, 2)/2; // easeInOutQuad
+    NT_KEYS.forEach(nt=>{
+      if(target[nt] !== undefined) state[nt] = start[nt] + (target[nt]-start[nt])*eased;
+    });
+    syncSliderUI(); render();
+    if(t<1){ presetAnimFrame = requestAnimationFrame(step); }
+    else{
+      NT_KEYS.forEach(nt=>{ if(target[nt] !== undefined) state[nt] = target[nt]; });
+      syncSliderUI(); render();
+      presetAnimFrame = null;
+    }
+  }
+  presetAnimFrame = requestAnimationFrame(step);
 }
 
 /* sensitivity slider */
@@ -560,6 +824,19 @@ function barColor(v){
   return '#f43f5e';
 }
 
+/* psychotic spectrum bars */
+const psyBarsWrap = document.getElementById('psyBarsWrap');
+PSY_ORDER.forEach(p=>{
+  const row = document.createElement('div');
+  row.innerHTML = `
+    <div class="flex items-center justify-between text-xs mb-0.5">
+      <span class="text-slate-300">${PSY_LABELS[p]}</span>
+      <span id="psybarval-${p}" class="text-slate-400">2</span>
+    </div>
+    <div class="bar-track"><div id="psybar-${p}" class="bar-fill" style="width:2%;background:#22c55e;"></div></div>`;
+  psyBarsWrap.appendChild(row);
+});
+
 /* ============================================================
    АНАЛИЗ СОСТОЯНИЯ (краткий текст)
    ============================================================ */
@@ -576,6 +853,13 @@ function buildAnalysisText(result){
   if(result.focus>65){ parts.push('Фокус внимания и исполнительные функции повышены.'); }
   else if(result.focus<35){ parts.push('Фокус внимания ослаблен.'); }
   if(result.regulation<35){ parts.push('Эмоциональная регуляция снижена — реакции могут быть менее устойчивыми.'); }
+
+  const wz = worstNtZone();
+  if(wz==='red'){
+    parts.push('⚠ Один или несколько нейромедиаторов в критической зоне — см. блок «Психотический спектр» ниже для клинической интерпретации.');
+  } else if(wz==='yellow' && currentPsy.overall>=15){
+    parts.push('Отдельные показатели выходят за пределы нормы — обратите внимание на блок «Психотический спектр».');
+  }
   return parts.join(' ');
 }
 
@@ -600,6 +884,10 @@ function buildExplainText(result){
   } else {
     out += 'Профиль близок к сбалансированному, без резко выраженных перекосов ни в одном из параметров.';
   }
+
+  if(worstNtZone()==='red' || currentPsy.overall>=40){
+    out += ' ' + buildPsychoticNote(currentPsy);
+  }
   return out;
 }
 
@@ -607,11 +895,14 @@ function buildExplainText(result){
    ОБНОВЛЕНИЕ SVG (регионы, пути, анимация потока)
    ============================================================ */
 function regionActivity(id){
-  // Возвращает 0..1 в зависимости от связанных нейромедиаторов региона
+  // Возвращает 0..1 в зависимости от связанных нейромедиаторов региона.
+  // Ограничено диапазоном 0–200%, как в исходной версии — базовая реакция не меняется
+  // при расширении слайдеров до 400%; экстремальная зона (>200%) обрабатывается отдельно
+  // ниже через psychotic-pulse/escalation, завязанные на computePsychoticSpectrum().
   const info = REGION_INFO[id];
   if(!info) return 0.5;
   let sum=0;
-  info.nts.forEach(nt=>{ sum += state[nt]/200; });
+  info.nts.forEach(nt=>{ sum += Math.min(state[nt],200)/200; });
   return Math.max(0, Math.min(1, sum/info.nts.length));
 }
 
@@ -630,6 +921,14 @@ function updateRegions(){
       el.style.display = hideCortex ? 'none' : '';
     }
   });
+
+  // Драматическая эскалация в экстремальной психотической зоне: амигдала и NAcc
+  // (ключевые узлы аберрантной значимости/паранойи и вознаграждения) получают
+  // усиленный пульсирующий glow, когда общий индекс психотической нагрузки высок.
+  ['region-nacc','region-amygdala'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.classList.toggle('psychotic-pulse', currentPsy.overall>=35);
+  });
 }
 
 function updatePaths(){
@@ -638,14 +937,29 @@ function updatePaths(){
     if(!el) return;
     const nt = el.dataset.nt;
     const level = state[nt];
-    const norm = level/200;
+    const norm = Math.min(level,200)/200; // базовая реакция как в исходной версии (0–200%)
     const visible = pathFilter==='all' || nt===pathFilter;
     el.style.display = visible ? '' : 'none';
-    el.style.strokeOpacity = (0.2 + norm*0.7).toFixed(2);
-    el.style.strokeWidth = (2 + norm*5).toFixed(1);
+
+    let opacity = 0.2 + norm*0.7;
+    let width = 2 + norm*5;
+    if(nt==='dopamine'){
+      // Экстремальная эскалация только для дофаминовых путей, завязанная на общий
+      // индекс психотической нагрузки — путь становится ярче/толще при риске психоза.
+      const extra = currentPsy.overall/100;
+      opacity = Math.min(1, opacity + extra*0.3);
+      width = Math.min(15, width + extra*5);
+    }
+    el.style.strokeOpacity = opacity.toFixed(2);
+    el.style.strokeWidth = width.toFixed(1);
     el.classList.toggle('glow-'+nt, level>150);
     el.classList.toggle('selected', id===selectedId);
   });
+
+  // Мезолимбический путь (VTA → NAcc) — главный анатомический субстрат позитивных
+  // симптомов в модели — получает тот же пульсирующий эффект при высокой нагрузке.
+  const mesolimbic = document.getElementById('path-mesolimbic');
+  if(mesolimbic) mesolimbic.classList.toggle('psychotic-pulse', currentPsy.overall>=35);
 }
 
 /* --- flow animation: движущиеся точки вдоль путей --- */
@@ -659,6 +973,20 @@ Object.keys(PATH_INFO).forEach(id=>{
   flowLayer.appendChild(dot);
   flowDots[id] = { el:dot, t:Math.random() };
 });
+// Мелкие "шумовые" точки вокруг мезолимбического пути — включаются только при высокой
+// психотической нагрузке (позитивные симптомы), чтобы визуализировать хаотичную
+// сигнальную активность. Немного точек, чтобы не перегружать картинку.
+const noiseDots = [];
+for(let i=0;i<6;i++){
+  const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  dot.setAttribute('r','1.5');
+  dot.setAttribute('fill','var(--dopamine)');
+  dot.style.display = 'none';
+  dot.style.pointerEvents = 'none';
+  flowLayer.appendChild(dot);
+  noiseDots.push(dot);
+}
+
 let lastFrame = performance.now();
 function animateFlow(now){
   const dt = Math.min(0.05, (now-lastFrame)/1000);
@@ -669,14 +997,36 @@ function animateFlow(now){
     if(pathEl.style.display==='none'){ info.el.style.display='none'; return; }
     info.el.style.display='';
     const nt = pathEl.dataset.nt;
-    const speed = 0.05 + (state[nt]/200)*0.35; // доля пути в секунду
+    let speed = 0.05 + (Math.min(state[nt],200)/200)*0.35; // доля пути в секунду (базовое поведение 0–200%)
+    if(nt==='dopamine' && currentPsy.overall>40){
+      // хаотичная, "дёрганая" скорость потока при высоком риске психоза
+      speed += (Math.random()-0.5)*0.4*(currentPsy.overall/100);
+      speed = Math.max(0.02, speed);
+    }
     info.t = (info.t + speed*dt) % 1;
     const len = pathEl.getTotalLength();
     const pt = pathEl.getPointAtLength(info.t*len);
     info.el.setAttribute('cx', pt.x);
     info.el.setAttribute('cy', pt.y);
-    info.el.style.opacity = (0.4 + (state[nt]/200)*0.6).toFixed(2);
+    info.el.style.opacity = (0.4 + (Math.min(state[nt],200)/200)*0.6).toFixed(2);
   });
+
+  const mesolimbic = document.getElementById('path-mesolimbic');
+  if(currentPsy.positive>50 && mesolimbic.style.display!=='none'){
+    const len = mesolimbic.getTotalLength();
+    noiseDots.forEach(dot=>{
+      const t = Math.random();
+      const pt = mesolimbic.getPointAtLength(t*len);
+      dot.setAttribute('cx', pt.x + (Math.random()-0.5)*14);
+      dot.setAttribute('cy', pt.y + (Math.random()-0.5)*14);
+      dot.setAttribute('r', (1+Math.random()*1.3).toFixed(1));
+      dot.style.display = '';
+      dot.style.opacity = (0.2 + Math.random()*0.4).toFixed(2);
+    });
+  } else {
+    noiseDots.forEach(dot=>{ dot.style.display='none'; });
+  }
+
   requestAnimationFrame(animateFlow);
 }
 requestAnimationFrame(animateFlow);
@@ -764,11 +1114,11 @@ document.getElementById('hideCortex').addEventListener('change', e=>{
 document.getElementById('presetSelect').addEventListener('change', e=>{
   const p = PRESETS[e.target.value];
   if(!p) return;
-  Object.assign(state, p);
-  syncSliderUI(); render();
+  animateStateTo(p); // плавный анимированный переход слайдеров к значениям пресета
   e.target.value = '';
 });
 document.getElementById('btnReset').addEventListener('click', ()=>{
+  stopPresetAnimation();
   Object.assign(state, PRESETS.baseline);
   state.sensitivity = 1;
   sensInput.value = 100;
@@ -776,7 +1126,8 @@ document.getElementById('btnReset').addEventListener('click', ()=>{
   syncSliderUI(); render();
 });
 document.getElementById('btnRandom').addEventListener('click', ()=>{
-  NT_KEYS.forEach(nt=>{ state[nt] = Math.round(Math.random()*40)*5; });
+  stopPresetAnimation();
+  NT_KEYS.forEach(nt=>{ state[nt] = Math.round(Math.random()*80)*5; }); // 0–400%
   syncSliderUI(); render();
 });
 
@@ -803,6 +1154,7 @@ aboutModal.addEventListener('click', e=>{ if(e.target===aboutModal){ aboutModal.
    ГЛАВНЫЙ ЦИКЛ ОТРИСОВКИ
    ============================================================ */
 function render(){
+  currentPsy = computePsychoticSpectrum(); // пересчитываем до всего остального, т.к. от него зависят SVG-эффекты и тексты
   const result = computeState();
   radarChart.data.datasets[0].data = PARAM_ORDER.map(p=>Math.round(result[p]));
   radarChart.update('none');
@@ -814,6 +1166,27 @@ function render(){
     bar.style.width = v + '%';
     bar.style.background = barColor(v);
   });
+
+  // --- психотический спектр ---
+  PSY_ORDER.forEach(p=>{
+    const v = Math.round(currentPsy[p]);
+    document.getElementById(`psybarval-${p}`).textContent = v;
+    const bar = document.getElementById(`psybar-${p}`);
+    bar.style.width = v + '%';
+    bar.style.background = barColor(v);
+  });
+  const overallV = Math.round(currentPsy.overall);
+  const meta = psyLevelMeta(overallV);
+  document.getElementById('psyOverallNum').textContent = overallV;
+  document.getElementById('psyOverallNum').style.color = meta.color;
+  const overallBar = document.getElementById('psyOverallBar');
+  overallBar.style.width = overallV + '%';
+  overallBar.style.background = meta.color;
+  const badge = document.getElementById('psyOverallBadge');
+  badge.textContent = meta.label;
+  badge.style.background = meta.color + '26';
+  badge.style.color = meta.color;
+  document.getElementById('psyClinicalNote').textContent = buildPsychoticNote(currentPsy);
 
   document.getElementById('analysisText').textContent = buildAnalysisText(result);
   updateRegions();
