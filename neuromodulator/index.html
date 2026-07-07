@@ -8,7 +8,9 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
   :root{
-    --dopamine:#f59e0b;
+    --dopaminePfc:#818cf8;           /* индиго — соответствует цвету PFC на схеме */
+    --dopamineMesolimbic:#f59e0b;    /* янтарный — классический "дофамин вознаграждения" */
+    --dopamineNigrostriatal:#d946ef; /* фуксия — визуально отличается от серотонина */
     --serotonin:#a855f7;
     --norepinephrine:#22d3ee;
     --gaba:#4ade80;
@@ -18,7 +20,9 @@
   ::-webkit-scrollbar-thumb{background:#334155;border-radius:4px;}
   ::-webkit-scrollbar-track{background:#0f172a;}
 
-  .glow-dopamine{filter:drop-shadow(0 0 6px var(--dopamine));}
+  .glow-dopaminePfc{filter:drop-shadow(0 0 6px var(--dopaminePfc));}
+  .glow-dopamineMesolimbic{filter:drop-shadow(0 0 6px var(--dopamineMesolimbic));}
+  .glow-dopamineNigrostriatal{filter:drop-shadow(0 0 6px var(--dopamineNigrostriatal));}
   .glow-serotonin{filter:drop-shadow(0 0 6px var(--serotonin));}
   .glow-norepinephrine{filter:drop-shadow(0 0 6px var(--norepinephrine));}
   .glow-gaba{filter:drop-shadow(0 0 6px var(--gaba));}
@@ -120,15 +124,22 @@
   @keyframes bannerPulse{0%,100%{box-shadow:0 0 0 rgba(239,68,68,0);}50%{box-shadow:0 0 10px rgba(239,68,68,.6);}}
 
   /* ================= ПСИХОТИЧЕСКАЯ ЭСКАЛАЦИЯ В SVG ================= */
+  /* Пульс завязан именно на мезолимбический дофамин — это "позитивно-симптомный" путь */
   @keyframes psychoticPulse{
-    0%,100%{ filter: drop-shadow(0 0 6px var(--dopamine)); }
-    50%{ filter: drop-shadow(0 0 20px var(--dopamine)) drop-shadow(0 0 8px #ef4444); }
+    0%,100%{ filter: drop-shadow(0 0 6px var(--dopamineMesolimbic)); }
+    50%{ filter: drop-shadow(0 0 20px var(--dopamineMesolimbic)) drop-shadow(0 0 8px #ef4444); }
   }
   .psychotic-pulse{ animation: psychoticPulse 1.1s ease-in-out infinite; }
 
   /* ================= ИНДЕКС ПСИХОТИЧЕСКОЙ НАГРУЗКИ ================= */
   .psy-gauge-num{font-size:28px;font-weight:700;line-height:1;min-width:2.2ch;text-align:center;}
   .psy-badge{font-size:11px;padding:2px 8px;border-radius:999px;display:inline-block;margin-top:4px;}
+
+  /* ================= ГРУППА "ДОФАМИН ПО ПУТЯМ" (сворачиваемая) ================= */
+  details.dopamine-group summary{list-style:none;cursor:pointer;user-select:none;}
+  details.dopamine-group summary::-webkit-details-marker{display:none;}
+  details.dopamine-group summary::before{content:'▸';display:inline-block;margin-right:5px;transition:transform .2s ease;color:#64748b;}
+  details.dopamine-group[open] summary::before{transform:rotate(90deg);}
 </style>
 </head>
 <body class="bg-slate-900 text-slate-200 min-h-screen scroll-thin">
@@ -159,6 +170,7 @@
           <option value="severe_negative">Тяжёлая негативная симптоматика</option>
           <option value="serotonin_syndrome">Серотониновый синдром</option>
           <option value="extreme_sedation">Экстремальная седация</option>
+          <option value="antipsychotic_treated">После приёма антипсихотика</option>
         </optgroup>
       </select>
       <button id="btnRandom" class="text-xs px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Случайные значения</button>
@@ -212,14 +224,14 @@
         <path class="sulcus" d="M300,90 C340,70 380,65 420,72 M330,110 C400,90 470,90 520,105"/>
 
         <!-- ================= PATHWAYS (drawn first, under regions) ================= -->
-        <path id="path-mesolimbic" class="pathway" data-nt="dopamine"
-          data-title="Мезолимбический дофаминовый путь" stroke="var(--dopamine)"
+        <path id="path-mesolimbic" class="pathway" data-nt="dopamineMesolimbic"
+          data-title="Мезолимбический дофаминовый путь (управляется слайдером «Дофамин мезолимб.»)" stroke="var(--dopamineMesolimbic)"
           d="M468,415 C410,372 362,332 330,290"/>
-        <path id="path-mesocortical" class="pathway" data-nt="dopamine"
-          data-title="Мезокортикальный дофаминовый путь" stroke="var(--dopamine)"
+        <path id="path-mesocortical" class="pathway" data-nt="dopaminePfc"
+          data-title="Мезокортикальный дофаминовый путь (управляется слайдером «Дофамин PFC»)" stroke="var(--dopaminePfc)"
           d="M468,415 C350,300 262,238 230,190"/>
-        <path id="path-nigrostriatal" class="pathway" data-nt="dopamine"
-          data-title="Нигростриатный дофаминовый путь" stroke="var(--dopamine)"
+        <path id="path-nigrostriatal" class="pathway" data-nt="dopamineNigrostriatal"
+          data-title="Нигростриатный дофаминовый путь (управляется слайдером «Дофамин нигростр.»)" stroke="var(--dopamineNigrostriatal)"
           d="M505,405 C452,340 402,282 360,235"/>
         <path id="path-serotonin-pfc" class="pathway" data-nt="serotonin"
           data-title="Серотонинергический путь (ядра шва → кора)" stroke="var(--serotonin)"
@@ -330,9 +342,13 @@
   <section class="xl:w-[36%] w-full flex flex-col gap-3">
 
     <!-- neurotransmitter controls -->
-    <div class="bg-slate-800/60 border border-slate-800 rounded-xl p-4">
+    <div class="bg-slate-800/60 border border-slate-800 rounded-xl p-4" id="ntSlidersCard">
       <h2 class="text-sm font-semibold text-slate-200 mb-3">Уровни нейромедиаторов</h2>
-      <div class="grid grid-cols-4 gap-2" id="slidersRow"></div>
+      <details class="dopamine-group mb-3" open>
+        <summary class="text-xs font-medium text-slate-300 mb-2">Дофамин (по путям) — 3 независимых пути</summary>
+        <div class="grid grid-cols-3 gap-2 mt-2" id="dopamineSlidersRow"></div>
+      </details>
+      <div class="grid grid-cols-3 gap-2" id="otherSlidersRow"></div>
     </div>
 
     <!-- state -->
@@ -376,9 +392,23 @@
       <button id="btnAboutClose" class="text-slate-400 hover:text-slate-200 text-xl leading-none">&times;</button>
     </div>
     <p class="text-sm text-slate-300 leading-relaxed mb-2">
-      Это сильно упрощённая учебная модель. Она использует линейные веса влияния четырёх нейромедиаторов
-      (дофамин, серотонин, норадреналин, ГАМК) на шесть параметров психического состояния.
+      Это сильно упрощённая учебная модель. Она использует линейные веса влияния шести нейромедиаторных
+      входов (дофамин по трём путям, серотонин, норадреналин, ГАМК) на шесть параметров психического состояния.
     </p>
+    <div class="border border-indigo-500/30 bg-indigo-500/5 rounded-lg p-3 mb-2">
+      <p class="text-sm text-indigo-200 leading-relaxed font-semibold mb-1">Почему дофамин разделён на три слайдера?</p>
+      <p class="text-sm text-slate-300 leading-relaxed">
+        В реальном мозге дофаминовые нейроны образуют функционально разные пути с разными эффектами.
+        Модель различает: <b>PFC-путь</b> (мезокортикальный, VTA → префронтальная кора — рабочая память,
+        планирование, эмоциональная регуляция; дефицит связан с СДВГ и негативной симптоматикой),
+        <b>мезолимбический путь</b> (VTA → прилежащее ядро — мотивация и вознаграждение; избыток,
+        особенно при низком ГАМК, связан с позитивными психотическими симптомами) и
+        <b>нигростриатный путь</b> (чёрная субстанция → стриатум — движение и привычки, слабее связан
+        с эмоционально-когнитивными параметрами). Раздельное управление позволяет увидеть разницу между,
+        например, терапевтическим действием стимуляторов при СДВГ (рост PFC-дофамина) и риском психоза
+        при их злоупотреблении (доминирование мезолимбического пути на фоне низкого ГАМК).
+      </p>
+    </div>
     <p class="text-sm text-slate-300 leading-relaxed mb-2">
       Реальный мозг — это ~86 миллиардов нейронов, сотни подтипов рецепторов (D1/D2, 5-HT1A/2A и др.),
       объёмная (внесинаптическая) передача, сложнейшие обратные связи и огромные индивидуальные различия.
@@ -409,23 +439,42 @@
    ДАННЫЕ МОДЕЛИ
    ============================================================ */
 
-// Веса влияния каждого нейромедиатора на 6 параметров состояния.
+// Веса влияния каждого нейромедиаторного входа на 6 параметров состояния.
 // Положительное значение = рост параметра при росте уровня НТ, отрицательное = снижение.
+// Дофамин разделён на три независимых пути (см. follow-up апгрейд): вместо единого веса
+// каждый путь несёт ту часть исходного "общего дофамина", за которую он физиологически
+// отвечает — сумма при равном росте всех трёх путей примерно соответствует прежней модели.
 const weights = {
-  dopamine:        { mood: 0.45, anxiety: 0.15,  motivation: 0.85, focus: 0.65,  regulation: 0.25,  energy: 0.55 },
-  serotonin:       { mood: 0.75, anxiety: -0.65, motivation: 0.10, focus: 0.25,  regulation: 0.85,  energy: 0.15 },
-  norepinephrine:  { mood: 0.20, anxiety: 0.55,  motivation: 0.40, focus: 0.75,  regulation: -0.15, energy: 0.80 },
-  gaba:            { mood: 0.30, anxiety: -0.85, motivation: -0.35,focus: -0.40, regulation: 0.70,  energy: -0.60 }
+  dopaminePfc:          { mood: 0.10, anxiety: -0.05, motivation: 0.10, focus: 0.70,  regulation: 0.45,  energy: 0.15 }, // рабочая память, фокус, top-down регуляция
+  dopamineMesolimbic:   { mood: 0.40, anxiety: 0.15,  motivation: 0.75, focus: 0.15,  regulation: 0.05,  energy: 0.35 }, // вознаграждение и мотивация (VTA → NAcc)
+  dopamineNigrostriatal:{ mood: 0.05, anxiety: 0.00,  motivation: 0.10, focus: 0.05,  regulation: 0.00,  energy: 0.35 }, // движение/привычки, слабая связь с психикой
+  serotonin:            { mood: 0.75, anxiety: -0.65, motivation: 0.10, focus: 0.25,  regulation: 0.85,  energy: 0.15 },
+  norepinephrine:       { mood: 0.20, anxiety: 0.55,  motivation: 0.40, focus: 0.75,  regulation: -0.15, energy: 0.80 },
+  gaba:                 { mood: 0.30, anxiety: -0.85, motivation: -0.35,focus: -0.40, regulation: 0.70,  energy: -0.60 }
 };
 
-const NT_LABELS = { dopamine:'Дофамин', serotonin:'Серотонин', norepinephrine:'Норадреналин', gaba:'ГАМК' };
-const NT_COLORS = { dopamine:'#f59e0b', serotonin:'#a855f7', norepinephrine:'#22d3ee', gaba:'#4ade80' };
+const NT_LABELS = {
+  dopaminePfc:'Дофамин PFC', dopamineMesolimbic:'Дофамин мезолимб.', dopamineNigrostriatal:'Дофамин нигростр.',
+  serotonin:'Серотонин', norepinephrine:'Норадреналин', gaba:'ГАМК'
+};
+const NT_COLORS = {
+  dopaminePfc:'#818cf8', dopamineMesolimbic:'#f59e0b', dopamineNigrostriatal:'#d946ef',
+  serotonin:'#a855f7', norepinephrine:'#22d3ee', gaba:'#4ade80'
+};
 const NT_ROLE = {
-  dopamine: 'Мотивация, вознаграждение, движение (мезолимбический, мезокортикальный, нигростриатный пути)',
+  dopaminePfc: 'Рабочая память, планирование, когнитивный контроль и эмоциональная регуляция (мезокортикальный путь). Дефицит связан с негативными симптомами и нарушениями фокуса (СДВГ, негативная симптоматика шизофрении).',
+  dopamineMesolimbic: 'Ключевой путь вознаграждения и мотивации (VTA → NAcc). Избыток, особенно при низком ГАМК, связан с позитивными психотическими симптомами и «аберрантной значимостью» стимулов.',
+  dopamineNigrostriatal: 'Моторный контроль, привычки и процедурное обучение (чёрная субстанция → стриатум). Слабо связан с эмоционально-когнитивными параметрами.',
   serotonin: 'Стабилизация настроения, снижение тревоги, эмоциональная регуляция',
   norepinephrine: 'Бодрость, внимание, arousal — особенно в префронтальной коре',
   gaba: 'Главный тормозной медиатор — спокойствие, снижение перевозбуждения'
 };
+
+// Единый список всех 6 нейромедиаторных входов (3 дофаминовых пути + 3 обычных),
+// используется везде generically: слайдеры, зоны, пресеты, взвешенная сумма в computeState().
+const DOPAMINE_KEYS = ['dopaminePfc','dopamineMesolimbic','dopamineNigrostriatal'];
+const OTHER_KEYS = ['serotonin','norepinephrine','gaba'];
+const NT_KEYS = [...DOPAMINE_KEYS, ...OTHER_KEYS];
 
 const PARAM_LABELS = {
   mood:'Настроение', anxiety:'Тревожность', motivation:'Мотивация и вознаграждение',
@@ -440,17 +489,17 @@ const PSY_LABELS = {
 const PSY_ORDER = ['positive','negative','disorganization'];
 
 const REGION_INFO = {
-  'region-pfc': { title:'Префронтальная кора (PFC)', nts:['dopamine','norepinephrine'],
-    desc:'Отвечает за планирование, торможение импульсов, рабочую память и принятие решений. Дофамин и норадреналин в PFC регулируют качество фокуса внимания и исполнительных функций — именно на эту область нацелены такие препараты, как atomoxetine, повышающие норадреналин преимущественно здесь.',
-    effect:'Повышает фокус и мотивацию; при недостатке норадреналина/дофамина — трудности с концентрацией и импульсивность.' },
-  'region-acc': { title:'Передняя поясная кора (ACC)', nts:['dopamine','serotonin'],
+  'region-pfc': { title:'Префронтальная кора (PFC)', nts:['dopaminePfc','norepinephrine'],
+    desc:'Отвечает за планирование, торможение импульсов, рабочую память и принятие решений. Дофамин (мезокортикальный путь, слайдер «Дофамин PFC») и норадреналин в PFC регулируют качество фокуса внимания и исполнительных функций — именно на эту область нацелены такие препараты, как atomoxetine, повышающие норадреналин преимущественно здесь.',
+    effect:'Повышает фокус и мотивацию; при недостатке норадреналина/PFC-дофамина — трудности с концентрацией, импульсивность и риск негативных симптомов.' },
+  'region-acc': { title:'Передняя поясная кора (ACC)', nts:['dopaminePfc','serotonin'],
     desc:'Участвует в мониторинге конфликтов, обнаружении ошибок и регуляции эмоциональной значимости событий. Связывает когнитивный контроль PFC с лимбической системой.',
     effect:'Влияет на регуляцию и способность переключать внимание между эмоциональными и когнитивными задачами.' },
   'region-thalamus': { title:'Таламус', nts:['norepinephrine'],
     desc:'«Релейная станция» мозга — почти вся сенсорная информация проходит через таламус на пути к коре. Уровень норадренергической активности модулирует, насколько бдительно таламус пропускает сигналы.',
     effect:'Определяет общий уровень arousal (бодрствования) и способность фильтровать раздражители.' },
-  'region-hypothalamus': { title:'Гипоталамус', nts:['norepinephrine','dopamine'],
-    desc:'Регулирует гомеостаз: голод, сон, температуру, стрессовый ответ (через гипофиз). Связан с базовыми энергетическими и мотивационными состояниями.',
+  'region-hypothalamus': { title:'Гипоталамус', nts:['norepinephrine','dopamineMesolimbic'],
+    desc:'Регулирует гомеостаз: голод, сон, температуру, стрессовый ответ (через гипофиз). Связан с базовыми энергетическими и мотивационными состояниями, близкими к системе вознаграждения.',
     effect:'Влияет на общий уровень энергии и базовые мотивационные драйвы.' },
   'region-amygdala': { title:'Амигдала (миндалевидное тело)', nts:['norepinephrine','serotonin','gaba'],
     desc:'Ключевая структура обработки страха и эмоциональной значимости. Норадреналин усиливает её реактивность, а серотонин и ГАМК, а также top-down контроль от PFC — тормозят избыточную активацию.',
@@ -458,17 +507,17 @@ const REGION_INFO = {
   'region-hippocampus': { title:'Гиппокамп', nts:['serotonin','gaba'],
     desc:'Критичен для формирования новых воспоминаний и контекстуальной регуляции эмоций (например, различения безопасного и опасного контекста). Хронический стресс и низкий серотонин ассоциируются со снижением его объёма и функции.',
     effect:'Влияет на эмоциональную регуляцию и способность контекстуально переоценивать тревожные стимулы.' },
-  'region-nacc': { title:'Прилежащее ядро (Nucleus Accumbens)', nts:['dopamine'],
-    desc:'Центральный узел «системы вознаграждения». Получает мезолимбический дофаминовый вход из VTA и кодирует предвкушение и удовольствие от вознаграждения.',
-    effect:'Главный драйвер мотивации; при низком дофамине здесь — ангедония и апатия.' },
-  'region-striatum': { title:'Дорсальный стриатум', nts:['dopamine'],
-    desc:'Участвует в формировании привычек, моторном планировании и процедурном обучении. Получает нигростриатный дофаминовый вход из чёрной субстанции.',
+  'region-nacc': { title:'Прилежащее ядро (Nucleus Accumbens)', nts:['dopamineMesolimbic'],
+    desc:'Центральный узел «системы вознаграждения». Получает мезолимбический дофаминовый вход из VTA (слайдер «Дофамин мезолимб.») и кодирует предвкушение и удовольствие от вознаграждения.',
+    effect:'Главный драйвер мотивации; при низком дофамине здесь — ангедония и апатия, при избытке — риск позитивных психотических симптомов.' },
+  'region-striatum': { title:'Дорсальный стриатум', nts:['dopamineNigrostriatal'],
+    desc:'Участвует в формировании привычек, моторном планировании и процедурном обучении. Получает нигростриатный дофаминовый вход из чёрной субстанции (слайдер «Дофамин нигростр.»).',
     effect:'Влияет на мотивацию к действию и плавность движений; выраженный дефицит дофамина здесь характерен для паркинсонизма.' },
-  'region-sn': { title:'Чёрная субстанция (Substantia Nigra)', nts:['dopamine'],
+  'region-sn': { title:'Чёрная субстанция (Substantia Nigra)', nts:['dopamineNigrostriatal'],
     desc:'Основной источник дофамина для нигростриатного пути, критичного для контроля движений.',
     effect:'Косвенно поддерживает энергию и мотивацию к движению.' },
-  'region-vta': { title:'Вентральная тегментальная область (VTA)', nts:['dopamine'],
-    desc:'Главный источник дофамина для мезолимбического и мезокортикального путей — «сердце» системы вознаграждения и мотивации.',
+  'region-vta': { title:'Вентральная тегментальная область (VTA)', nts:['dopamineMesolimbic','dopaminePfc'],
+    desc:'Главный источник дофамина сразу для двух путей — мезолимбического (к NAcc) и мезокортикального (к PFC) — «сердце» системы вознаграждения и мотивации.',
     effect:'Ключевой узел мотивации, вознаграждения и фокуса через связи с NAcc и PFC.' },
   'region-raphe': { title:'Ядра шва (Raphe nuclei)', nts:['serotonin'],
     desc:'Основной источник серотонина в мозге, с широкими восходящими проекциями в кору, амигдалу и другие структуры.',
@@ -482,14 +531,14 @@ const REGION_INFO = {
 };
 
 const PATH_INFO = {
-  'path-mesolimbic': { title:'Мезолимбический дофаминовый путь (VTA → NAcc)', nts:['dopamine'],
-    desc:'Ключевой путь системы вознаграждения: дофаминовые нейроны VTA проецируются в прилежащее ядро, кодируя предвкушение и удовольствие. Гиперактивность связана с зависимостями, гипоактивность — с ангедонией.',
-    effect:'Основной вклад в параметр «Мотивация и вознаграждение».', related:['region-vta','region-nacc'] },
-  'path-mesocortical': { title:'Мезокортикальный дофаминовый путь (VTA → PFC)', nts:['dopamine'],
-    desc:'Проецирует дофамин из VTA в префронтальную кору, поддерживая рабочую память, планирование и когнитивный контроль мотивации.',
-    effect:'Влияет на фокус и мотивацию одновременно.', related:['region-vta','region-pfc'] },
-  'path-nigrostriatal': { title:'Нигростриатный дофаминовый путь (SN → стриатум)', nts:['dopamine'],
-    desc:'Дофаминовый путь, критичный для контроля движений и формирования привычек. Дегенерация этого пути лежит в основе болезни Паркинсона.',
+  'path-mesolimbic': { title:'Мезолимбический дофаминовый путь (VTA → NAcc)', nts:['dopamineMesolimbic'],
+    desc:'Ключевой путь системы вознаграждения: дофаминовые нейроны VTA проецируются в прилежащее ядро, кодируя предвкушение и удовольствие. Гиперактивность (особенно при низком ГАМК) связана с позитивными психотическими симптомами и зависимостями, гипоактивность — с ангедонией. Управляется слайдером «Дофамин мезолимб.».',
+    effect:'Основной вклад в параметр «Мотивация и вознаграждение», а также в позитивные симптомы психотического спектра.', related:['region-vta','region-nacc'] },
+  'path-mesocortical': { title:'Мезокортикальный дофаминовый путь (VTA → PFC)', nts:['dopaminePfc'],
+    desc:'Проецирует дофамин из VTA в префронтальную кору, поддерживая рабочую память, планирование и когнитивный контроль мотивации. Управляется слайдером «Дофамин PFC».',
+    effect:'Влияет на фокус и мотивацию; дефицит — ключевой вклад в негативные симптомы психотического спектра.', related:['region-vta','region-pfc'] },
+  'path-nigrostriatal': { title:'Нигростриатный дофаминовый путь (SN → стриатум)', nts:['dopamineNigrostriatal'],
+    desc:'Дофаминовый путь, критичный для контроля движений и формирования привычек. Дегенерация этого пути лежит в основе болезни Паркинсона. Управляется слайдером «Дофамин нигростр.» и практически не влияет на психотический спектр.',
     effect:'Косвенно поддерживает энергию и мотивацию к действию.', related:['region-sn','region-striatum'] },
   'path-serotonin-pfc': { title:'Серотонинергический путь: ядра шва → кора', nts:['serotonin'],
     desc:'Широкая восходящая проекция серотонина, модулирующая настроение, когнитивную гибкость и устойчивость к стрессу на уровне коры.',
@@ -509,23 +558,32 @@ const PATH_INFO = {
 };
 
 const PRESETS = {
-  baseline: { dopamine:100, serotonin:100, norepinephrine:100, gaba:100 },
-  adhd:     { dopamine:130, serotonin:100, norepinephrine:150, gaba:90 },
-  anxiety:  { dopamine:110, serotonin:60,  norepinephrine:160, gaba:50 },
-  anhedonia:{ dopamine:40,  serotonin:70,  norepinephrine:60,  gaba:110 },
-  stable:   { dopamine:100, serotonin:140, norepinephrine:90,  gaba:120 },
+  baseline: { dopaminePfc:100, dopamineMesolimbic:100, dopamineNigrostriatal:100, serotonin:100, norepinephrine:100, gaba:100 },
+  // ADHD: повышенный PFC-дофамин (терапевтическая цель стимуляторов) + умеренный мезолимбический
+  adhd:     { dopaminePfc:150, dopamineMesolimbic:120, dopamineNigrostriatal:100, serotonin:100, norepinephrine:150, gaba:90 },
+  anxiety:  { dopaminePfc:110, dopamineMesolimbic:110, dopamineNigrostriatal:100, serotonin:60,  norepinephrine:160, gaba:50 },
+  anhedonia:{ dopaminePfc:40,  dopamineMesolimbic:40,  dopamineNigrostriatal:40,  serotonin:70,  norepinephrine:60,  gaba:110 },
+  stable:   { dopaminePfc:100, dopamineMesolimbic:100, dopamineNigrostriatal:100, serotonin:140, norepinephrine:90,  gaba:120 },
   // --- экстремальные / клинически вдохновлённые пресеты (см. computePsychoticSpectrum) ---
-  stimulant_psychosis: { dopamine:380, serotonin:90,  norepinephrine:300, gaba:20  },
-  schizophrenia_like:  { dopamine:360, serotonin:80,  norepinephrine:140, gaba:12  },
-  severe_negative:     { dopamine:15,  serotonin:60,  norepinephrine:50,  gaba:130 },
-  serotonin_syndrome:  { dopamine:110, serotonin:320, norepinephrine:260, gaba:70  },
-  extreme_sedation:    { dopamine:90,  serotonin:100, norepinephrine:40,  gaba:380 }
+  // Стимулятор в токсической дозе: дофамин растёт по всем путям, доминирует мезолимбический, ГАМК подавлен
+  stimulant_psychosis: { dopaminePfc:200, dopamineMesolimbic:380, dopamineNigrostriatal:250, serotonin:90,  norepinephrine:300, gaba:20  },
+  // Классический "гипер-мезолимбический / гипо-префронтальный" дуальный паттерн — теперь буквально, без хаков
+  schizophrenia_like:  { dopaminePfc:28,  dopamineMesolimbic:350, dopamineNigrostriatal:150, serotonin:80,  norepinephrine:140, gaba:8   },
+  severe_negative:     { dopaminePfc:10,  dopamineMesolimbic:70,  dopamineNigrostriatal:60,  serotonin:60,  norepinephrine:50,  gaba:130 },
+  serotonin_syndrome:  { dopaminePfc:110, dopamineMesolimbic:110, dopamineNigrostriatal:100, serotonin:320, norepinephrine:260, gaba:70  },
+  extreme_sedation:    { dopaminePfc:90,  dopamineMesolimbic:90,  dopamineNigrostriatal:90,  serotonin:100, norepinephrine:40,  gaba:380 },
+  // Антипсихотик блокирует D2-рецепторы широко: мезолимбический дофамин падает (симптомы стихают),
+  // но заодно немного "проседают" PFC и нигростриатный путь (иатрогенные негативные симптомы / EPS)
+  antipsychotic_treated: { dopaminePfc:70, dopamineMesolimbic:55, dopamineNigrostriatal:60, serotonin:100, norepinephrine:90, gaba:110 }
 };
 
 /* ============================================================
    СОСТОЯНИЕ ПРИЛОЖЕНИЯ
    ============================================================ */
-const state = { dopamine:100, serotonin:100, norepinephrine:100, gaba:100, sensitivity:1 };
+const state = {
+  dopaminePfc:100, dopamineMesolimbic:100, dopamineNigrostriatal:100,
+  serotonin:100, norepinephrine:100, gaba:100, sensitivity:1
+};
 let selectedId = null;      // текущий выбранный регион/путь
 let pathFilter = 'all';     // 'all' | 'dopamine'
 let hideCortex = false;
@@ -536,27 +594,18 @@ let currentPsy = { positive:0, negative:0, disorganization:0, overall:0 }; // к
    РАСЧЁТ ПСИХИЧЕСКОГО СОСТОЯНИЯ
    ============================================================ */
 function computeState(){
-  const dev = {
-    dopamine: (state.dopamine-100)/100,
-    serotonin: (state.serotonin-100)/100,
-    norepinephrine: (state.norepinephrine-100)/100,
-    gaba: (state.gaba-100)/100
-  };
+  const dev = {};
+  NT_KEYS.forEach(nt=>{ dev[nt] = (state[nt]-100)/100; });
   const s = state.sensitivity;
   const result = {};
   PARAM_ORDER.forEach(p=>{
-    let raw = 50 + s*100*(
-      dev.dopamine*weights.dopamine[p] +
-      dev.serotonin*weights.serotonin[p] +
-      dev.norepinephrine*weights.norepinephrine[p] +
-      dev.gaba*weights.gaba[p]
-    );
+    let raw = 50 + s*100*NT_KEYS.reduce((sum,nt)=> sum + dev[nt]*weights[nt][p], 0);
     result[p]=raw;
   });
   // небольшие взаимодействия между нейромедиаторами
-  result.anxiety += s*8*Math.max(0, dev.dopamine - dev.serotonin);       // высокая мотивация без серотонинового "буфера" -> больше тревоги
-  result.regulation += s*6*(dev.serotonin - dev.dopamine);               // баланс серотонин/дофамин -> стабильность
-  result.motivation += s*4*(dev.norepinephrine - dev.gaba)*0.5;          // arousal слегка подстёгивает мотивацию, торможение снижает
+  result.anxiety += s*8*Math.max(0, dev.dopamineMesolimbic - dev.serotonin);  // высокая мезолимбическая мотивация без серотонинового "буфера" -> больше тревоги
+  result.regulation += s*6*(dev.serotonin - dev.dopaminePfc);                // баланс серотонин/PFC-дофамин -> стабильность
+  result.motivation += s*4*(dev.norepinephrine - dev.gaba)*0.5;              // arousal слегка подстёгивает мотивацию, торможение снижает
 
   PARAM_ORDER.forEach(p=>{ result[p]=Math.max(0,Math.min(100,result[p])); });
   return result;
@@ -584,18 +633,23 @@ function worstNtZone(){
    Сильно упрощённая иллюстрация двух классических идей психофармакологии:
 
    1) Дофаминовая гипотеза шизофрении (Howes & Kapur, 2009, упрощённо): избыточная
-      мезолимбическая дофаминовая передача связана с «аберрантной значимостью» стимулов
-      и позитивными симптомами (бред, галлюцинации, паранойя). Дефицит дофамина/исполнительного
-      тонуса в префронтальных цепях, напротив, ассоциируется с негативными и когнитивными
-      симптомами («гипофронтальность»). Здесь используется единый слайдер «Дофамин» как
-      грубый прокси для мезолимбической активности — модель не различает подтипы рецепторов
-      и регионы, поэтому «дефицит в PFC» частично аппроксимируется отдельным низким
-      диапазоном того же слайдера, а частично — перекрёстным членом с потерей ГАМК ниже.
+      мезолимбическая дофаминовая передача (слайдер «Дофамин мезолимб.») связана с
+      «аберрантной значимостью» стимулов и позитивными симптомами (бред, галлюцинации,
+      паранойя). Дефицит дофамина/исполнительного тонуса именно в префронтальных цепях
+      (слайдер «Дофамин PFC»), напротив, ассоциируется с негативными и когнитивными
+      симптомами («гипофронтальность»). Благодаря разделению дофамина на три независимых
+      пути классический «двойной» гипер-мезолимбический / гипо-префронтальный паттерн
+      теперь моделируется буквально (два разных слайдера), без искусственных обходных
+      манёвров — высокий мезолимбический дофамин почти не влияет на негативные симптомы
+      напрямую, а высокий PFC-дофамин, наоборот, слегка снижает риск позитивных симптомов
+      (защитный, "буферизующий" эффект хорошего исполнительного контроля).
+      Нигростриатный путь (движение/привычки) в психотическом спектре не участвует —
+      он физиологически слабее всего связан с эмоционально-когнитивными симптомами.
    2) ГАМК как главный тормозной медиатор нелинейно определяет, «срывается» ли система
       в дезорганизацию: при его тяжёлом дефиците теряется тормозной контроль над
       возбуждающими путями (риск дезорганизации/психоза максимален именно при сочетании
-      высокого дофамина И низкого ГАМК), а при его избытке — наступает седация и
-      эмоциональное уплощение.
+      высокого мезолимбического дофамина И низкого ГАМК), а при его избытке — наступает
+      седация и эмоциональное уплощение.
 
    Все параметры малоактивны (близки к 0) в пределах нормального диапазона (70–130%)
    и растут строго нелинейно (через степенные "ramp/sharpen" функции) только за пределами
@@ -611,37 +665,44 @@ function ramp(value, start, end){
 function sharpen(t, power){ return Math.pow(Math.max(0,Math.min(1,t)), power); }
 
 function computePsychoticSpectrum(){
-  const d=state.dopamine, s=state.serotonin, n=state.norepinephrine, g=state.gaba;
+  const dPfc = state.dopaminePfc, dMeso = state.dopamineMesolimbic;
+  const s = state.serotonin, n = state.norepinephrine, g = state.gaba;
   const sens = state.sensitivity;
+  // Нигростриатный дофамин (dopamineNigrostriatal) сюда намеренно не входит — см. комментарий выше.
 
-  const dopHyper   = sharpen(ramp(d, 260, 400), 1.6); // мезолимбическая гиперактивность (>260%, резко к 400%)
-  const dopHypoPFC = sharpen(ramp(d, 50, 0), 1.4);    // прямой дефицит дофамина -> гипофронтальность (<50%, резко к 0%)
-  const gabaLoss   = sharpen(ramp(g, 40, 0), 1.5);    // потеря тормозного контроля (<40%, резко к 0%)
-  const gabaFlood  = sharpen(ramp(g, 300, 400), 1.3); // крайняя ГАМК-седация (>300%, резко к 400%)
-  const neHyper    = sharpen(ramp(n, 220, 400), 1.3); // норадренергическая гипервозбудимость (arousal/паранойя)
-  const serFlood   = sharpen(ramp(s, 260, 400), 1.3); // серотониновый избыток (серотониновый синдром: спутанность)
+  const mesoHyper  = sharpen(ramp(dMeso, 260, 400), 1.6); // мезолимбическая гиперактивность (>260%, резко к 400%)
+  const pfcHypo    = sharpen(ramp(dPfc, 50, 0), 1.4);     // прямой дефицит PFC-дофамина -> гипофронтальность (<50%, резко к 0%)
+  const pfcProtect = ramp(dPfc, 130, 400);                // высокий PFC-дофамин слегка защищает от позитивных симптомов (0..1, линейно)
+  const gabaLoss   = sharpen(ramp(g, 40, 0), 1.5);        // потеря тормозного контроля (<40%, резко к 0%)
+  const gabaFlood  = sharpen(ramp(g, 300, 400), 1.3);     // крайняя ГАМК-седация (>300%, резко к 400%)
+  const neHyper    = sharpen(ramp(n, 220, 400), 1.3);     // норадренергическая гипервозбудимость (arousal/паранойя)
+  const serFlood   = sharpen(ramp(s, 260, 400), 1.3);     // серотониновый избыток (серотониновый синдром: спутанность)
 
   // Позитивные симптомы (галлюцинации, бред, паранойя, подозрительность):
-  // растут резко при дофаминовой гиперактивности; усиливаются потерей ГАМК-торможения
-  // и норадренергическим возбуждением (тревожно-параноидная окраска высокого arousal).
+  // растут резко при мезолимбической гиперактивности; усиливаются потерей ГАМК-торможения
+  // и норадренергическим возбуждением (тревожно-параноидная окраска высокого arousal);
+  // высокий PFC-дофамин (хороший исполнительный контроль) немного снижает риск даже
+  // при мезолимбической гиперактивности — упрощённый "буферизующий" эффект PFC.
   let positive = 3
-    + sens*70*dopHyper*(1 + 0.7*gabaLoss)
-    + sens*32*neHyper*dopHyper;
+    + sens*72*mesoHyper*(1 + 0.7*gabaLoss)
+    + sens*32*neHyper*mesoHyper
+    - sens*10*pfcProtect*mesoHyper;
 
   // Негативные симптомы (аволиция, ангедония, эмоциональное уплощение, снижение мотивации):
-  // растут при прямом дефиците дофамина и при крайней ГАМК-седации; дополнительно немного
-  // усиливаются при тяжёлой сочетанной дисрегуляции (высокий дофамин + потеря ГАМК-торможения),
-  // грубо приближая классический «гипер-мезолимбический / гипо-префронтальный» паттерн.
+  // главный драйвер — прямой дефицит именно PFC-дофамина; крайняя ГАМК-седация тоже
+  // даёт эмоциональное уплощение; небольшой перекрёстный член (мезолимбическая
+  // гиперактивность + потеря ГАМК) грубо отражает, что тяжёлая сочетанная дисрегуляция
+  // часто сопровождается и когнитивным/негативным компонентом, а не только позитивным.
   let negative = 3
-    + sens*78*dopHypoPFC
+    + sens*80*pfcHypo
     + sens*42*gabaFlood
-    + sens*55*dopHyper*gabaLoss;
+    + sens*40*mesoHyper*gabaLoss;
 
   // Дезорганизация мышления (спутанность, трудности концентрации и связной речи):
-  // главный драйвер — сочетание высокого дофамина и потери ГАМК-торможения; серотониновый
-  // избыток и крайняя седация тоже вносят вклад (спутанность иного генеза).
+  // главный драйвер — сочетание высокого мезолимбического дофамина и потери ГАМК-торможения;
+  // серотониновый избыток и крайняя седация тоже вносят вклад (спутанность иного генеза).
   let disorganization = 2
-    + sens*85*dopHyper*gabaLoss
+    + sens*85*mesoHyper*gabaLoss
     + sens*28*serFlood
     + sens*18*gabaFlood;
 
@@ -668,9 +729,9 @@ function buildPsychoticNote(psy){
   }
   let lead;
   if(psy.positive>=psy.negative && psy.positive>=psy.disorganization){
-    lead = `Критически высокий уровень дофамина${state.gaba<40?' в сочетании с низким ГАМК':''} моделирует состояние, близкое к острому психотическому эпизоду (бред, галлюцинации, паранойя).`;
+    lead = `Критически высокий мезолимбический дофамин${state.gaba<40?' в сочетании с низким ГАМК':''} моделирует состояние, близкое к острому психотическому эпизоду (бред, галлюцинации, паранойя).`;
   } else if(psy.negative>=psy.disorganization){
-    lead = 'Модель показывает выраженную негативную симптоматику — апатию, эмоциональное уплощение и снижение мотивации, характерные для тяжёлой гипофункции дофаминовой/исполнительной системы либо крайней седации.';
+    lead = 'Модель показывает выраженную негативную симптоматику — апатию, эмоциональное уплощение и снижение мотивации, характерные для тяжёлого дефицита PFC-дофамина (гипофронтальность) либо крайней ГАМК-седации.';
   } else {
     lead = 'Модель показывает выраженную дезорганизацию мышления — спутанность и трудности с концентрацией и связной речью.';
   }
@@ -683,14 +744,15 @@ function buildPsychoticNote(psy){
 /* ============================================================
    UI: СЛАЙДЕРЫ
    ============================================================ */
-const slidersRow = document.getElementById('slidersRow');
-const NT_KEYS = ['dopamine','serotonin','norepinephrine','gaba'];
-NT_KEYS.forEach(nt=>{
+const dopamineSlidersRow = document.getElementById('dopamineSlidersRow');
+const otherSlidersRow = document.getElementById('otherSlidersRow');
+
+function buildSliderColumn(nt){
   const col = document.createElement('div');
   col.className = 'flex flex-col items-center gap-1.5 tooltip nt-col';
   col.innerHTML = `
     <div class="tip">${NT_ROLE[nt]}</div>
-    <span class="text-[11px] font-medium flex items-center gap-1" style="color:${NT_COLORS[nt]}">${NT_LABELS[nt]}<span class="nt-warn-icon">⚠</span></span>
+    <span class="text-[11px] font-medium flex items-center gap-1 text-center" style="color:${NT_COLORS[nt]}">${NT_LABELS[nt]}<span class="nt-warn-icon">⚠</span></span>
     <span id="val-${nt}" class="text-sm font-semibold text-slate-100 nt-value">100%</span>
     <div class="vslider-box" style="--nt-color:${NT_COLORS[nt]}">
       <input type="range" id="slider-${nt}" min="0" max="400" step="5" value="100">
@@ -705,8 +767,11 @@ NT_KEYS.forEach(nt=>{
       <button data-nt="${nt}" data-v="150" class="quickbtn text-[10px] px-1.5 py-0.5 rounded bg-slate-700 hover:bg-slate-600">150%</button>
       <button data-nt="${nt}" data-v="300" class="quickbtn text-[10px] px-1.5 py-0.5 rounded bg-slate-700 hover:bg-slate-600">300%</button>
     </div>`;
-  slidersRow.appendChild(col);
-});
+  return col;
+}
+DOPAMINE_KEYS.forEach(nt=> dopamineSlidersRow.appendChild(buildSliderColumn(nt)));
+OTHER_KEYS.forEach(nt=> otherSlidersRow.appendChild(buildSliderColumn(nt)));
+
 function stopPresetAnimation(){
   if(presetAnimFrame){ cancelAnimationFrame(presetAnimFrame); presetAnimFrame = null; }
 }
@@ -717,13 +782,15 @@ NT_KEYS.forEach(nt=>{
     syncSliderUI(); render();
   });
 });
-slidersRow.addEventListener('click', e=>{
+function onQuickBtnClick(e){
   const btn = e.target.closest('.quickbtn');
   if(!btn) return;
   stopPresetAnimation();
   state[btn.dataset.nt] = Number(btn.dataset.v);
   syncSliderUI(); render();
-});
+}
+dopamineSlidersRow.addEventListener('click', onQuickBtnClick);
+otherSlidersRow.addEventListener('click', onQuickBtnClick);
 function syncSliderUI(){
   let anyRed = false;
   NT_KEYS.forEach(nt=>{
@@ -744,7 +811,8 @@ function syncSliderUI(){
 /* Плавный анимированный переход слайдеров к целевым значениям пресета */
 function animateStateTo(target, duration=900){
   stopPresetAnimation();
-  const start = { dopamine:state.dopamine, serotonin:state.serotonin, norepinephrine:state.norepinephrine, gaba:state.gaba };
+  const start = {};
+  NT_KEYS.forEach(nt=>{ start[nt] = state[nt]; });
   const t0 = performance.now();
   function step(now){
     const t = Math.min(1, (now-t0)/duration);
@@ -865,20 +933,21 @@ function buildAnalysisText(result){
 
 /* "Объяснить текущий профиль" — более развёрнутый текст */
 function buildExplainText(result){
-  const d=state.dopamine, s=state.serotonin, n=state.norepinephrine, g=state.gaba;
-  let out = `При дофамине ${d}%, серотонине ${s}%, норадреналине ${n}% и ГАМК ${g}% модель показывает: `;
+  const dPfc=state.dopaminePfc, dMeso=state.dopamineMesolimbic, dNigro=state.dopamineNigrostriatal;
+  const s=state.serotonin, n=state.norepinephrine, g=state.gaba;
+  let out = `При дофамине (PFC ${dPfc}% / мезолимб. ${dMeso}% / нигростр. ${dNigro}%), серотонине ${s}%, норадреналине ${n}% и ГАМК ${g}% модель показывает: `;
   const desc = [];
   desc.push(`настроение ${Math.round(result.mood)}/100 (${result.mood>=60?'приподнятое':result.mood<=40?'сниженное':'нейтральное'}), `+
              `тревожность ${Math.round(result.anxiety)}/100, мотивация и вознаграждение ${Math.round(result.motivation)}/100, `+
              `фокус ${Math.round(result.focus)}/100, эмоциональная регуляция ${Math.round(result.regulation)}/100, энергия ${Math.round(result.energy)}/100.`);
   out += desc.join('');
   out += ' ';
-  if(n>130 && d>110 && s<90){
-    out += 'Сочетание повышенного норадреналина и дофамина при умеренно-низком серотонине повышает мотивацию и фокус, но заметно увеличивает риск тревожности и снижает эмоциональную гибкость — похоже на профиль сильной психостимуляции без достаточного «буфера» стабильности.';
+  if(n>130 && dMeso>110 && s<90){
+    out += 'Сочетание повышенного норадреналина и мезолимбического дофамина при умеренно-низком серотонине повышает мотивацию и фокус, но заметно увеличивает риск тревожности и снижает эмоциональную гибкость — похоже на профиль сильной психостимуляции без достаточного «буфера» стабильности.';
   } else if(s>120 && g>100){
     out += 'Высокий серотонин в сочетании с достаточным ГАМК даёт хорошую эмоциональную стабильность и низкую тревожность, но не добавляет выраженной мотивации — типичный профиль спокойного, уравновешенного, но не гиперактивного состояния.';
-  } else if(d<60 && s<90){
-    out += 'Сниженный дофамин при невысоком серотонине хорошо согласуется с картиной ангедонии и сниженного настроения — уменьшено как удовольствие от вознаграждения, так и общая эмоциональная окраска.';
+  } else if(dPfc<60 && dMeso<70 && s<90){
+    out += 'Сниженный дофамин (особенно в PFC) при невысоком серотонине хорошо согласуется с картиной ангедонии и сниженного настроения — уменьшено как удовольствие от вознаграждения, так и общая эмоциональная окраска.';
   } else if(g>140){
     out += 'Очень высокий уровень ГАМК даёт выраженное торможение возбуждения — тревожность падает, но вместе с ней снижаются энергия и мотивация.';
   } else {
@@ -938,14 +1007,17 @@ function updatePaths(){
     const nt = el.dataset.nt;
     const level = state[nt];
     const norm = Math.min(level,200)/200; // базовая реакция как в исходной версии (0–200%)
-    const visible = pathFilter==='all' || nt===pathFilter;
+    // "dopamine" в фильтре — обобщённая категория, покрывающая все три дофаминовых пути
+    const visible = pathFilter==='all' || (pathFilter==='dopamine' ? DOPAMINE_KEYS.includes(nt) : nt===pathFilter);
     el.style.display = visible ? '' : 'none';
 
     let opacity = 0.2 + norm*0.7;
     let width = 2 + norm*5;
-    if(nt==='dopamine'){
-      // Экстремальная эскалация только для дофаминовых путей, завязанная на общий
-      // индекс психотической нагрузки — путь становится ярче/толще при риске психоза.
+    if(id==='path-mesolimbic'){
+      // Экстремальная эскалация — только для мезолимбического пути (позитивные симптомы),
+      // завязанная на общий индекс психотической нагрузки. PFC- и нигростриатный пути
+      // намеренно не эскалируют так же — они не являются анатомическим субстратом
+      // позитивных симптомов в этой модели.
       const extra = currentPsy.overall/100;
       opacity = Math.min(1, opacity + extra*0.3);
       width = Math.min(15, width + extra*5);
@@ -980,7 +1052,7 @@ const noiseDots = [];
 for(let i=0;i<6;i++){
   const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
   dot.setAttribute('r','1.5');
-  dot.setAttribute('fill','var(--dopamine)');
+  dot.setAttribute('fill','var(--dopamineMesolimbic)');
   dot.style.display = 'none';
   dot.style.pointerEvents = 'none';
   flowLayer.appendChild(dot);
@@ -998,8 +1070,8 @@ function animateFlow(now){
     info.el.style.display='';
     const nt = pathEl.dataset.nt;
     let speed = 0.05 + (Math.min(state[nt],200)/200)*0.35; // доля пути в секунду (базовое поведение 0–200%)
-    if(nt==='dopamine' && currentPsy.overall>40){
-      // хаотичная, "дёрганая" скорость потока при высоком риске психоза
+    if(id==='path-mesolimbic' && currentPsy.overall>40){
+      // хаотичная, "дёрганая" скорость потока — только на мезолимбическом пути при высоком риске психоза
       speed += (Math.random()-0.5)*0.4*(currentPsy.overall/100);
       speed = Math.max(0.02, speed);
     }
