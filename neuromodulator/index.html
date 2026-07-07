@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>НейроМоделятор: Мозг, Пути и Состояния</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --dopamine:#f59e0b;
+    --serotonin:#a855f7;
+    --norepinephrine:#22d3ee;
+    --gaba:#4ade80;
+  }
+  html,body{background:#0f172a;}
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-thumb{background:#334155;border-radius:4px;}
+  ::-webkit-scrollbar-track{background:#0f172a;}
+
+  .glow-dopamine{filter:drop-shadow(0 0 6px var(--dopamine));}
+  .glow-serotonin{filter:drop-shadow(0 0 6px var(--serotonin));}
+  .glow-norepinephrine{filter:drop-shadow(0 0 6px var(--norepinephrine));}
+  .glow-gaba{filter:drop-shadow(0 0 6px var(--gaba));}
+
+  .region{cursor:pointer;transition:filter .4s ease, opacity .4s ease, transform .3s ease;}
+  .region:hover{transform:scale(1.03);}
+  .region.selected{filter:drop-shadow(0 0 10px #fff);}
+  .region-label{pointer-events:none;font-family:ui-sans-serif,system-ui,sans-serif;user-select:none;}
+
+  .pathway{cursor:pointer;fill:none;stroke-linecap:round;transition:stroke-opacity .4s ease, stroke-width .4s ease, filter .4s ease;}
+  .pathway.selected{filter:drop-shadow(0 0 8px #fff);}
+  .flow-dot{pointer-events:none;}
+
+  .vslider-box{position:relative;width:44px;height:170px;margin:0 auto;}
+  .vslider-box input[type=range]{
+    position:absolute;top:50%;left:50%;width:170px;height:26px;
+    transform:translate(-50%,-50%) rotate(-90deg);
+    -webkit-appearance:none;appearance:none;background:transparent;margin:0;
+  }
+  .vslider-box input[type=range]::-webkit-slider-runnable-track{
+    height:6px;border-radius:3px;background:linear-gradient(to right,#1e293b,#334155);
+  }
+  .vslider-box input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;
+    background:var(--nt-color,#94a3b8);border:2px solid #0f172a;margin-top:-7px;
+    box-shadow:0 0 8px var(--nt-color,#94a3b8);cursor:pointer;
+  }
+  .vslider-box input[type=range]::-moz-range-track{
+    height:6px;border-radius:3px;background:linear-gradient(to right,#1e293b,#334155);
+  }
+  .vslider-box input[type=range]::-moz-range-thumb{
+    width:16px;height:16px;border-radius:50%;background:var(--nt-color,#94a3b8);
+    border:2px solid #0f172a;box-shadow:0 0 8px var(--nt-color,#94a3b8);cursor:pointer;
+  }
+
+  .quickbtn{transition:background .15s ease,transform .1s ease;}
+  .quickbtn:active{transform:scale(0.94);}
+
+  .tooltip{position:relative;}
+  .tooltip .tip{
+    visibility:hidden;opacity:0;transition:opacity .15s ease;
+    position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
+    background:#1e293b;color:#e2e8f0;padding:6px 10px;border-radius:6px;font-size:11px;
+    white-space:normal;width:190px;z-index:50;box-shadow:0 4px 12px rgba(0,0,0,.4);
+    border:1px solid #334155;
+  }
+  .tooltip:hover .tip{visibility:visible;opacity:1;}
+
+  .bar-track{background:#1e293b;border-radius:999px;overflow:hidden;height:10px;}
+  .bar-fill{height:100%;border-radius:999px;transition:width .5s ease,background .5s ease;}
+
+  .modal-backdrop{background:rgba(2,6,23,.75);backdrop-filter:blur(2px);}
+  .fade-in{animation:fadeIn .25s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  .brain-outline{fill:#1e293b;stroke:#475569;stroke-width:2;}
+  .sulcus{stroke:#0f172a;stroke-width:2;fill:none;opacity:.5;}
+
+  select.themed, input.themed{background:#0f172a;border:1px solid #334155;color:#e2e8f0;}
+  .scroll-thin{scrollbar-width:thin;scrollbar-color:#334155 #0f172a;}
+</style>
+</head>
+<body class="bg-slate-900 text-slate-200 min-h-screen scroll-thin">
+
+<!-- HEADER -->
+<header class="border-b border-slate-800 bg-slate-900/95 backdrop-blur sticky top-0 z-40">
+  <div class="max-w-[1500px] mx-auto px-4 py-3 flex flex-wrap items-center gap-3 justify-between">
+    <div>
+      <h1 class="text-lg md:text-xl font-semibold text-slate-100">
+        Нейро<span class="text-indigo-400">Моделятор</span>: Мозг, Пути и Состояния
+      </h1>
+      <p class="text-xs text-slate-400">Интерактивная модель нейромедиаторов и психического состояния — образовательный инструмент</p>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+      <select id="presetSelect" class="themed text-xs rounded-md px-2 py-1.5">
+        <option value="">Пресеты…</option>
+        <option value="baseline">Базовый баланс</option>
+        <option value="adhd">Фокус и мотивация (ADHD-оптимизированное)</option>
+        <option value="anxiety">Тревожность</option>
+        <option value="anhedonia">Сниженная мотивация / ангедония</option>
+        <option value="stable">Хорошая эмоциональная стабильность</option>
+      </select>
+      <button id="btnRandom" class="text-xs px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Случайные значения</button>
+      <button id="btnReset" class="text-xs px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700">Сбросить всё</button>
+      <button id="btnAbout" class="text-xs px-3 py-1.5 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white">О модели</button>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-[1500px] mx-auto px-4 py-4 flex flex-col xl:flex-row gap-4">
+
+  <!-- LEFT / MAIN AREA -->
+  <section class="xl:w-[64%] w-full flex flex-col gap-3">
+
+    <!-- filters -->
+    <div class="flex flex-wrap items-center gap-4 bg-slate-800/50 border border-slate-800 rounded-lg px-3 py-2 text-xs">
+      <span class="text-slate-400">Фильтры:</span>
+      <label class="flex items-center gap-1.5 cursor-pointer">
+        <input type="radio" name="pathFilter" value="all" checked class="accent-indigo-500"> Показать все связи
+      </label>
+      <label class="flex items-center gap-1.5 cursor-pointer">
+        <input type="radio" name="pathFilter" value="dopamine" class="accent-amber-500"> Только дофаминовые пути
+      </label>
+      <label class="flex items-center gap-1.5 cursor-pointer ml-2">
+        <input type="checkbox" id="hideCortex" class="accent-teal-400"> Скрыть кору (PFC/ACC)
+      </label>
+      <div class="flex items-center gap-2 ml-auto">
+        <span class="text-slate-400">Чувствительность модели</span>
+        <input type="range" id="sensitivity" min="50" max="200" step="5" value="100" class="w-28 accent-teal-400">
+        <span id="sensitivityVal" class="text-slate-300 w-10">100%</span>
+      </div>
+    </div>
+
+    <!-- SVG BRAIN -->
+    <div class="bg-slate-800/40 border border-slate-800 rounded-xl p-2 relative">
+      <svg id="brainSvg" viewBox="0 0 920 620" class="w-full h-auto select-none">
+        <defs>
+          <linearGradient id="gradCortex" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#4338ca"/>
+          </linearGradient>
+        </defs>
+
+        <!-- cerebellum (decorative, non-interactive) -->
+        <ellipse cx="735" cy="435" rx="80" ry="62" fill="#134e4a" opacity="0.55" stroke="#0f766e" stroke-width="1.5"/>
+        <path d="M675,410 q60,-10 120,5 M672,432 q62,-6 126,6 M670,454 q62,0 128,6" class="sulcus" stroke="#0f766e" opacity=".4"/>
+
+        <!-- main brain outline -->
+        <path class="brain-outline" d="M150,120 C250,40 500,28 655,58 C782,86 852,178 842,278
+          C862,340 830,402 772,440 C764,482 700,522 652,540 C600,560 522,560 480,540
+          C420,560 350,555 300,520 C220,480 160,420 140,340 C110,260 100,180 150,120 Z"/>
+        <path class="sulcus" d="M300,90 C340,70 380,65 420,72 M330,110 C400,90 470,90 520,105"/>
+
+        <!-- ================= PATHWAYS (drawn first, under regions) ================= -->
+        <path id="path-mesolimbic" class="pathway" data-nt="dopamine"
+          data-title="Мезолимбический дофаминовый путь" stroke="var(--dopamine)"
+          d="M468,415 C410,372 362,332 330,290"/>
+        <path id="path-mesocortical" class="pathway" data-nt="dopamine"
+          data-title="Мезокортикальный дофаминовый путь" stroke="var(--dopamine)"
+          d="M468,415 C350,300 262,238 230,190"/>
+        <path id="path-nigrostriatal" class="pathway" data-nt="dopamine"
+          data-title="Нигростриатный дофаминовый путь" stroke="var(--dopamine)"
+          d="M505,405 C452,340 402,282 360,235"/>
+        <path id="path-serotonin-pfc" class="pathway" data-nt="serotonin"
+          data-title="Серотонинергический путь (ядра шва → кора)" stroke="var(--serotonin)"
+          d="M565,445 C452,382 320,282 230,190"/>
+        <path id="path-serotonin-amyg" class="pathway" data-nt="serotonin"
+          data-title="Серотонинергический путь (ядра шва → амигдала)" stroke="var(--serotonin)"
+          d="M565,445 C500,412 460,376 420,340"/>
+        <path id="path-ne-pfc" class="pathway" data-nt="norepinephrine"
+          data-title="Норадренергический путь (голубое пятно → PFC)" stroke="var(--norepinephrine)"
+          d="M605,420 C480,340 340,240 230,190"/>
+        <path id="path-ne-thal" class="pathway" data-nt="norepinephrine"
+          data-title="Норадренергический путь (голубое пятно → таламус)" stroke="var(--norepinephrine)"
+          d="M605,420 C560,380 512,320 470,252"/>
+        <path id="path-gaba-topdown" class="pathway" data-nt="gaba"
+          data-title="Тормозной top-down путь (PFC → амигдала)" stroke="var(--gaba)"
+          stroke-dasharray="2 7"
+          d="M230,190 C300,232 362,282 420,340"/>
+
+        <!-- ================= REGIONS ================= -->
+        <g id="region-pfc" class="region" data-group="cortex" data-title="Префронтальная кора (PFC)">
+          <ellipse cx="230" cy="190" rx="92" ry="70" fill="url(#gradCortex)" stroke="#a5b4fc" stroke-width="1.5"/>
+          <text x="230" y="193" text-anchor="middle" class="region-label" fill="#eef2ff" font-size="13" font-weight="600">PFC</text>
+        </g>
+
+        <g id="region-acc" class="region" data-group="cortex" data-title="Передняя поясная кора (ACC)">
+          <ellipse cx="345" cy="150" rx="52" ry="19" fill="#6366f1" stroke="#a5b4fc" stroke-width="1.5" transform="rotate(-8 345 150)"/>
+          <text x="345" y="153" text-anchor="middle" class="region-label" fill="#eef2ff" font-size="10" font-weight="600">ACC</text>
+        </g>
+
+        <g id="region-thalamus" class="region" data-title="Таламус">
+          <ellipse cx="470" cy="252" rx="46" ry="40" fill="#94a3b8" stroke="#cbd5e1" stroke-width="1.5"/>
+          <text x="470" y="255" text-anchor="middle" class="region-label" fill="#0f172a" font-size="11" font-weight="600">Таламус</text>
+        </g>
+
+        <g id="region-hypothalamus" class="region" data-title="Гипоталамус">
+          <ellipse cx="452" cy="298" rx="21" ry="15" fill="#fb923c" stroke="#fed7aa" stroke-width="1.5"/>
+          <text x="478" y="294" text-anchor="start" class="region-label" fill="#fed7aa" font-size="9">Гипоталамус</text>
+        </g>
+
+        <g id="region-amygdala" class="region" data-title="Амигдала (миндалевидное тело)">
+          <ellipse cx="420" cy="340" rx="24" ry="19" fill="#ea580c" stroke="#fed7aa" stroke-width="1.5"/>
+          <text x="420" y="367" text-anchor="middle" class="region-label" fill="#fed7aa" font-size="9">Амигдала</text>
+        </g>
+
+        <g id="region-hippocampus" class="region" data-title="Гиппокамп">
+          <path d="M483,328 C528,312 572,326 585,358 C596,384 578,406 552,400"
+            fill="none" stroke="#c2410c" stroke-width="13" stroke-linecap="round"/>
+          <text x="565" y="418" text-anchor="middle" class="region-label" fill="#fed7aa" font-size="9">Гиппокамп</text>
+        </g>
+
+        <g id="region-nacc" class="region" data-title="Прилежащее ядро (Nucleus Accumbens)">
+          <circle cx="330" cy="290" r="17" fill="#a855f7" stroke="#e9d5ff" stroke-width="1.5"/>
+          <text x="330" y="316" text-anchor="middle" class="region-label" fill="#e9d5ff" font-size="8.5">NAcc</text>
+        </g>
+
+        <g id="region-striatum" class="region" data-title="Дорсальный стриатум">
+          <ellipse cx="362" cy="233" rx="48" ry="36" fill="#7e22ce" opacity="0.85" stroke="#e9d5ff" stroke-width="1.5"/>
+          <text x="362" y="236" text-anchor="middle" class="region-label" fill="#f3e8ff" font-size="9">Стриатум</text>
+        </g>
+
+        <g id="region-sn" class="region" data-title="Чёрная субстанция (Substantia Nigra)">
+          <ellipse cx="505" cy="405" rx="20" ry="11" fill="#581c87" stroke="#d8b4fe" stroke-width="1.5"/>
+          <text x="505" y="425" text-anchor="middle" class="region-label" fill="#d8b4fe" font-size="8">SN</text>
+        </g>
+
+        <g id="region-vta" class="region" data-title="Вентральная тегментальная область (VTA)">
+          <ellipse cx="466" cy="418" rx="15" ry="10" fill="#7e22ce" stroke="#d8b4fe" stroke-width="1.5"/>
+          <text x="466" y="437" text-anchor="middle" class="region-label" fill="#d8b4fe" font-size="8">VTA</text>
+        </g>
+
+        <g id="region-raphe" class="region" data-title="Ядра шва (Raphe nuclei)">
+          <ellipse cx="565" cy="445" rx="17" ry="11" fill="#7e22ce" stroke="#e9d5ff" stroke-width="1.5"/>
+          <text x="565" y="466" text-anchor="middle" class="region-label" fill="#e9d5ff" font-size="8">Ядра шва</text>
+        </g>
+
+        <g id="region-brainstem" class="region" data-title="Ствол мозга">
+          <ellipse cx="628" cy="485" rx="52" ry="90" fill="#155e75" opacity="0.9" stroke="#67e8f9" stroke-width="1.5" transform="rotate(8 628 485)"/>
+          <text x="628" y="490" text-anchor="middle" class="region-label" fill="#cffafe" font-size="9">Ствол мозга</text>
+        </g>
+
+        <g id="region-lc" class="region" data-title="Голубое пятно (Locus Coeruleus)">
+          <ellipse cx="605" cy="420" rx="13" ry="9" fill="#0e7490" stroke="#a5f3fc" stroke-width="1.5"/>
+          <text x="614" y="405" text-anchor="middle" class="region-label" fill="#a5f3fc" font-size="8">LC</text>
+        </g>
+
+        <!-- flow dots container -->
+        <g id="flowLayer"></g>
+      </svg>
+      <p class="text-[11px] text-slate-500 px-2 pb-1">Кликните на структуру или путь, чтобы увидеть подробности. Наведите на слайдеры справа для описания роли нейромедиатора.</p>
+    </div>
+
+    <!-- INFO PANEL -->
+    <div id="infoPanel" class="bg-slate-800/60 border border-slate-800 rounded-xl p-4 min-h-[130px]">
+      <div class="text-slate-500 text-sm" id="infoEmpty">Выберите структуру или путь на схеме, чтобы увидеть описание.</div>
+      <div id="infoContent" class="hidden fade-in">
+        <div class="flex items-start justify-between gap-3">
+          <h3 id="infoTitle" class="text-base font-semibold text-slate-100"></h3>
+          <button id="btnHighlight" class="text-xs px-2.5 py-1 rounded-md bg-teal-600/80 hover:bg-teal-500 text-white whitespace-nowrap">Выделить связанные пути</button>
+        </div>
+        <p id="infoDesc" class="text-sm text-slate-300 mt-2 leading-relaxed"></p>
+        <div class="mt-2 flex flex-wrap gap-2" id="infoNts"></div>
+        <p id="infoEffect" class="text-xs text-slate-400 mt-2"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- RIGHT PANEL -->
+  <section class="xl:w-[36%] w-full flex flex-col gap-3">
+
+    <!-- neurotransmitter controls -->
+    <div class="bg-slate-800/60 border border-slate-800 rounded-xl p-4">
+      <h2 class="text-sm font-semibold text-slate-200 mb-3">Уровни нейромедиаторов</h2>
+      <div class="grid grid-cols-4 gap-2" id="slidersRow"></div>
+    </div>
+
+    <!-- state -->
+    <div class="bg-slate-800/60 border border-slate-800 rounded-xl p-4">
+      <h2 class="text-sm font-semibold text-slate-200 mb-2">Текущее психическое состояние</h2>
+      <div class="w-full max-w-[340px] mx-auto"><canvas id="radarChart" height="260"></canvas></div>
+      <div id="barsWrap" class="mt-3 flex flex-col gap-2.5"></div>
+      <div class="mt-3 bg-slate-900/60 border border-slate-700 rounded-lg p-3">
+        <p class="text-xs text-slate-400 mb-1">Анализ состояния</p>
+        <p id="analysisText" class="text-sm text-slate-200 leading-relaxed"></p>
+      </div>
+      <button id="btnExplain" class="mt-3 w-full text-xs px-3 py-2 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white">Объяснить текущий профиль</button>
+      <div id="explainBox" class="hidden mt-2 text-sm text-slate-200 bg-slate-900/60 border border-slate-700 rounded-lg p-3 leading-relaxed fade-in"></div>
+    </div>
+  </section>
+</main>
+
+<!-- ABOUT MODAL -->
+<div id="aboutModal" class="hidden fixed inset-0 z-50 modal-backdrop items-center justify-center p-4">
+  <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-lg w-full p-5 fade-in">
+    <div class="flex justify-between items-center mb-3">
+      <h3 class="text-lg font-semibold text-slate-100">О модели</h3>
+      <button id="btnAboutClose" class="text-slate-400 hover:text-slate-200 text-xl leading-none">&times;</button>
+    </div>
+    <p class="text-sm text-slate-300 leading-relaxed mb-2">
+      Это сильно упрощённая учебная модель. Она использует линейные веса влияния четырёх нейромедиаторов
+      (дофамин, серотонин, норадреналин, ГАМК) на шесть параметров психического состояния.
+    </p>
+    <p class="text-sm text-slate-300 leading-relaxed mb-2">
+      Реальный мозг — это ~86 миллиардов нейронов, сотни подтипов рецепторов (D1/D2, 5-HT1A/2A и др.),
+      объёмная (внесинаптическая) передача, сложнейшие обратные связи и огромные индивидуальные различия.
+      Ни один параметр психики не определяется одним веществом.
+    </p>
+    <p class="text-sm text-slate-300 leading-relaxed">
+      Модель предназначена <b>только для построения интуиции</b> об общих принципах психофармакологии
+      (например, почему «высокий дофамин» не всегда означает хорошее настроение) — а не для клинических
+      выводов, самодиагностики или подбора терапии.
+    </p>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   ДАННЫЕ МОДЕЛИ
+   ============================================================ */
+
+// Веса влияния каждого нейромедиатора на 6 параметров состояния.
+// Положительное значение = рост параметра при росте уровня НТ, отрицательное = снижение.
+const weights = {
+  dopamine:        { mood: 0.45, anxiety: 0.15,  motivation: 0.85, focus: 0.65,  regulation: 0.25,  energy: 0.55 },
+  serotonin:       { mood: 0.75, anxiety: -0.65, motivation: 0.10, focus: 0.25,  regulation: 0.85,  energy: 0.15 },
+  norepinephrine:  { mood: 0.20, anxiety: 0.55,  motivation: 0.40, focus: 0.75,  regulation: -0.15, energy: 0.80 },
+  gaba:            { mood: 0.30, anxiety: -0.85, motivation: -0.35,focus: -0.40, regulation: 0.70,  energy: -0.60 }
+};
+
+const NT_LABELS = { dopamine:'Дофамин', serotonin:'Серотонин', norepinephrine:'Норадреналин', gaba:'ГАМК' };
+const NT_COLORS = { dopamine:'#f59e0b', serotonin:'#a855f7', norepinephrine:'#22d3ee', gaba:'#4ade80' };
+const NT_ROLE = {
+  dopamine: 'Мотивация, вознаграждение, движение (мезолимбический, мезокортикальный, нигростриатный пути)',
+  serotonin: 'Стабилизация настроения, снижение тревоги, эмоциональная регуляция',
+  norepinephrine: 'Бодрость, внимание, arousal — особенно в префронтальной коре',
+  gaba: 'Главный тормозной медиатор — спокойствие, снижение перевозбуждения'
+};
+
+const PARAM_LABELS = {
+  mood:'Настроение', anxiety:'Тревожность', motivation:'Мотивация и вознаграждение',
+  focus:'Фокус и исполн. функции', regulation:'Эмоциональная регуляция', energy:'Энергия и бодрость'
+};
+const PARAM_ORDER = ['mood','anxiety','motivation','focus','regulation','energy'];
+
+const REGION_INFO = {
+  'region-pfc': { title:'Префронтальная кора (PFC)', nts:['dopamine','norepinephrine'],
+    desc:'Отвечает за планирование, торможение импульсов, рабочую память и принятие решений. Дофамин и норадреналин в PFC регулируют качество фокуса внимания и исполнительных функций — именно на эту область нацелены такие препараты, как atomoxetine, повышающие норадреналин преимущественно здесь.',
+    effect:'Повышает фокус и мотивацию; при недостатке норадреналина/дофамина — трудности с концентрацией и импульсивность.' },
+  'region-acc': { title:'Передняя поясная кора (ACC)', nts:['dopamine','serotonin'],
+    desc:'Участвует в мониторинге конфликтов, обнаружении ошибок и регуляции эмоциональной значимости событий. Связывает когнитивный контроль PFC с лимбической системой.',
+    effect:'Влияет на регуляцию и способность переключать внимание между эмоциональными и когнитивными задачами.' },
+  'region-thalamus': { title:'Таламус', nts:['norepinephrine'],
+    desc:'«Релейная станция» мозга — почти вся сенсорная информация проходит через таламус на пути к коре. Уровень норадренергической активности модулирует, насколько бдительно таламус пропускает сигналы.',
+    effect:'Определяет общий уровень arousal (бодрствования) и способность фильтровать раздражители.' },
+  'region-hypothalamus': { title:'Гипоталамус', nts:['norepinephrine','dopamine'],
+    desc:'Регулирует гомеостаз: голод, сон, температуру, стрессовый ответ (через гипофиз). Связан с базовыми энергетическими и мотивационными состояниями.',
+    effect:'Влияет на общий уровень энергии и базовые мотивационные драйвы.' },
+  'region-amygdala': { title:'Амигдала (миндалевидное тело)', nts:['norepinephrine','serotonin','gaba'],
+    desc:'Ключевая структура обработки страха и эмоциональной значимости. Норадреналин усиливает её реактивность, а серотонин и ГАМК, а также top-down контроль от PFC — тормозят избыточную активацию.',
+    effect:'Главный вклад в тревожность; хорошая регуляция от PFC снижает её гиперактивность.' },
+  'region-hippocampus': { title:'Гиппокамп', nts:['serotonin','gaba'],
+    desc:'Критичен для формирования новых воспоминаний и контекстуальной регуляции эмоций (например, различения безопасного и опасного контекста). Хронический стресс и низкий серотонин ассоциируются со снижением его объёма и функции.',
+    effect:'Влияет на эмоциональную регуляцию и способность контекстуально переоценивать тревожные стимулы.' },
+  'region-nacc': { title:'Прилежащее ядро (Nucleus Accumbens)', nts:['dopamine'],
+    desc:'Центральный узел «системы вознаграждения». Получает мезолимбический дофаминовый вход из VTA и кодирует предвкушение и удовольствие от вознаграждения.',
+    effect:'Главный драйвер мотивации; при низком дофамине здесь — ангедония и апатия.' },
+  'region-striatum': { title:'Дорсальный стриатум', nts:['dopamine'],
+    desc:'Участвует в формировании привычек, моторном планировании и процедурном обучении. Получает нигростриатный дофаминовый вход из чёрной субстанции.',
+    effect:'Влияет на мотивацию к действию и плавность движений; выраженный дефицит дофамина здесь характерен для паркинсонизма.' },
+  'region-sn': { title:'Чёрная субстанция (Substantia Nigra)', nts:['dopamine'],
+    desc:'Основной источник дофамина для нигростриатного пути, критичного для контроля движений.',
+    effect:'Косвенно поддерживает энергию и мотивацию к движению.' },
+  'region-vta': { title:'Вентральная тегментальная область (VTA)', nts:['dopamine'],
+    desc:'Главный источник дофамина для мезолимбического и мезокортикального путей — «сердце» системы вознаграждения и мотивации.',
+    effect:'Ключевой узел мотивации, вознаграждения и фокуса через связи с NAcc и PFC.' },
+  'region-raphe': { title:'Ядра шва (Raphe nuclei)', nts:['serotonin'],
+    desc:'Основной источник серотонина в мозге, с широкими восходящими проекциями в кору, амигдалу и другие структуры.',
+    effect:'Стабилизирует настроение и снижает тревожность по всему мозгу.' },
+  'region-lc': { title:'Голубое пятно (Locus Coeruleus)', nts:['norepinephrine'],
+    desc:'Основной источник норадреналина в мозге. Активируется в ответ на стресс и новизну, повышая общий уровень arousal.',
+    effect:'Определяет бодрость, готовность реагировать и, при избытке, — тревожность.' },
+  'region-brainstem': { title:'Ствол мозга', nts:['norepinephrine'],
+    desc:'Содержит жизненно важные центры (дыхание, сердечный ритм) и служит «проходным двором» для восходящих и нисходящих путей, включая норадренергические и серотонинергические волокна.',
+    effect:'Общая база бодрствования и вегетативной регуляции.' }
+};
+
+const PATH_INFO = {
+  'path-mesolimbic': { title:'Мезолимбический дофаминовый путь (VTA → NAcc)', nts:['dopamine'],
+    desc:'Ключевой путь системы вознаграждения: дофаминовые нейроны VTA проецируются в прилежащее ядро, кодируя предвкушение и удовольствие. Гиперактивность связана с зависимостями, гипоактивность — с ангедонией.',
+    effect:'Основной вклад в параметр «Мотивация и вознаграждение».', related:['region-vta','region-nacc'] },
+  'path-mesocortical': { title:'Мезокортикальный дофаминовый путь (VTA → PFC)', nts:['dopamine'],
+    desc:'Проецирует дофамин из VTA в префронтальную кору, поддерживая рабочую память, планирование и когнитивный контроль мотивации.',
+    effect:'Влияет на фокус и мотивацию одновременно.', related:['region-vta','region-pfc'] },
+  'path-nigrostriatal': { title:'Нигростриатный дофаминовый путь (SN → стриатум)', nts:['dopamine'],
+    desc:'Дофаминовый путь, критичный для контроля движений и формирования привычек. Дегенерация этого пути лежит в основе болезни Паркинсона.',
+    effect:'Косвенно поддерживает энергию и мотивацию к действию.', related:['region-sn','region-striatum'] },
+  'path-serotonin-pfc': { title:'Серотонинергический путь: ядра шва → кора', nts:['serotonin'],
+    desc:'Широкая восходящая проекция серотонина, модулирующая настроение, когнитивную гибкость и устойчивость к стрессу на уровне коры.',
+    effect:'Ключевой вклад в настроение и эмоциональную регуляцию.', related:['region-raphe','region-pfc'] },
+  'path-serotonin-amyg': { title:'Серотонинергический путь: ядра шва → амигдала', nts:['serotonin'],
+    desc:'Серотониновая проекция, напрямую тормозящая избыточную реактивность амигдалы, снижая интенсивность реакций страха и тревоги.',
+    effect:'Главный механизм снижения тревожности через прямое торможение амигдалы.', related:['region-raphe','region-amygdala'] },
+  'path-ne-pfc': { title:'Норадренергический путь: голубое пятно → PFC', nts:['norepinephrine'],
+    desc:'Норадреналин из голубого пятна повышает возбудимость PFC, улучшая внимание и скорость реакции — механизм действия atomoxetine и части стимуляторов.',
+    effect:'Ключевой вклад в фокус внимания и энергию.', related:['region-lc','region-pfc'] },
+  'path-ne-thal': { title:'Норадренергический путь: голубое пятно → таламус', nts:['norepinephrine'],
+    desc:'Модулирует пропускную способность таламуса, регулируя общий уровень бодрствования и чувствительность к сенсорным стимулам.',
+    effect:'Определяет общий уровень arousal.', related:['region-lc','region-thalamus'] },
+  'path-gaba-topdown': { title:'Тормозной top-down путь: PFC → амигдала', nts:['gaba'],
+    desc:'Регуляторная связь, посредством которой префронтальная кора (с участием ГАМКергических интернейронов) сдерживает реактивность амигдалы — основа сознательной регуляции эмоций.',
+    effect:'Чем сильнее этот путь, тем лучше эмоциональная регуляция и ниже тревожность.', related:['region-pfc','region-amygdala'] }
+};
+
+const PRESETS = {
+  baseline: { dopamine:100, serotonin:100, norepinephrine:100, gaba:100 },
+  adhd:     { dopamine:130, serotonin:100, norepinephrine:150, gaba:90 },
+  anxiety:  { dopamine:110, serotonin:60,  norepinephrine:160, gaba:50 },
+  anhedonia:{ dopamine:40,  serotonin:70,  norepinephrine:60,  gaba:110 },
+  stable:   { dopamine:100, serotonin:140, norepinephrine:90,  gaba:120 }
+};
+
+/* ============================================================
+   СОСТОЯНИЕ ПРИЛОЖЕНИЯ
+   ============================================================ */
+const state = { dopamine:100, serotonin:100, norepinephrine:100, gaba:100, sensitivity:1 };
+let selectedId = null;      // текущий выбранный регион/путь
+let pathFilter = 'all';     // 'all' | 'dopamine'
+let hideCortex = false;
+
+/* ============================================================
+   РАСЧЁТ ПСИХИЧЕСКОГО СОСТОЯНИЯ
+   ============================================================ */
+function computeState(){
+  const dev = {
+    dopamine: (state.dopamine-100)/100,
+    serotonin: (state.serotonin-100)/100,
+    norepinephrine: (state.norepinephrine-100)/100,
+    gaba: (state.gaba-100)/100
+  };
+  const s = state.sensitivity;
+  const result = {};
+  PARAM_ORDER.forEach(p=>{
+    let raw = 50 + s*100*(
+      dev.dopamine*weights.dopamine[p] +
+      dev.serotonin*weights.serotonin[p] +
+      dev.norepinephrine*weights.norepinephrine[p] +
+      dev.gaba*weights.gaba[p]
+    );
+    result[p]=raw;
+  });
+  // небольшие взаимодействия между нейромедиаторами
+  result.anxiety += s*8*Math.max(0, dev.dopamine - dev.serotonin);       // высокая мотивация без серотонинового "буфера" -> больше тревоги
+  result.regulation += s*6*(dev.serotonin - dev.dopamine);               // баланс серотонин/дофамин -> стабильность
+  result.motivation += s*4*(dev.norepinephrine - dev.gaba)*0.5;          // arousal слегка подстёгивает мотивацию, торможение снижает
+
+  PARAM_ORDER.forEach(p=>{ result[p]=Math.max(0,Math.min(100,result[p])); });
+  return result;
+}
+
+/* ============================================================
+   UI: СЛАЙДЕРЫ
+   ============================================================ */
+const slidersRow = document.getElementById('slidersRow');
+const NT_KEYS = ['dopamine','serotonin','norepinephrine','gaba'];
+NT_KEYS.forEach(nt=>{
+  const col = document.createElement('div');
+  col.className = 'flex flex-col items-center gap-1.5 tooltip';
+  col.innerHTML = `
+    <div class="tip">${NT_ROLE[nt]}</div>
+    <span class="text-[11px] font-medium" style="color:${NT_COLORS[nt]}">${NT_LABELS[nt]}</span>
+    <span id="val-${nt}" class="text-sm font-semibold text-slate-100">100%</span>
+    <div class="vslider-box" style="--nt-color:${NT_COLORS[nt]}">
+      <input type="range" id="slider-${nt}" min="0" max="200" step="5" value="100">
+    </div>
+    <div class="flex gap-1 mt-1">
+      <button data-nt="${nt}" data-v="50" class="quickbtn text-[10px] px-1.5 py-0.5 rounded bg-slate-700 hover:bg-slate-600">50%</button>
+      <button data-nt="${nt}" data-v="100" class="quickbtn text-[10px] px-1.5 py-0.5 rounded bg-slate-700 hover:bg-slate-600">100%</button>
+      <button data-nt="${nt}" data-v="150" class="quickbtn text-[10px] px-1.5 py-0.5 rounded bg-slate-700 hover:bg-slate-600">150%</button>
+    </div>`;
+  slidersRow.appendChild(col);
+});
+NT_KEYS.forEach(nt=>{
+  document.getElementById(`slider-${nt}`).addEventListener('input', e=>{
+    state[nt] = Number(e.target.value);
+    syncSliderUI(); render();
+  });
+});
+slidersRow.addEventListener('click', e=>{
+  const btn = e.target.closest('.quickbtn');
+  if(!btn) return;
+  state[btn.dataset.nt] = Number(btn.dataset.v);
+  syncSliderUI(); render();
+});
+function syncSliderUI(){
+  NT_KEYS.forEach(nt=>{
+    document.getElementById(`slider-${nt}`).value = state[nt];
+    document.getElementById(`val-${nt}`).textContent = state[nt] + '%';
+  });
+}
+
+/* sensitivity slider */
+const sensInput = document.getElementById('sensitivity');
+sensInput.addEventListener('input', e=>{
+  state.sensitivity = Number(e.target.value)/100;
+  document.getElementById('sensitivityVal').textContent = e.target.value + '%';
+  render();
+});
+
+/* ============================================================
+   RADAR CHART
+   ============================================================ */
+const ctx = document.getElementById('radarChart').getContext('2d');
+const radarChart = new Chart(ctx, {
+  type:'radar',
+  data:{
+    labels: PARAM_ORDER.map(p=>PARAM_LABELS[p]),
+    datasets:[{
+      label:'Состояние',
+      data: PARAM_ORDER.map(()=>50),
+      backgroundColor:'rgba(99,102,241,0.25)',
+      borderColor:'#818cf8',
+      pointBackgroundColor:'#fbbf24',
+      pointBorderColor:'#0f172a',
+      borderWidth:2
+    }]
+  },
+  options:{
+    responsive:true,
+    animation:{duration:400},
+    scales:{
+      r:{
+        min:0, max:100,
+        angleLines:{color:'#334155'},
+        grid:{color:'#334155'},
+        pointLabels:{color:'#cbd5e1', font:{size:10}},
+        ticks:{display:false, stepSize:25}
+      }
+    },
+    plugins:{ legend:{display:false} }
+  }
+});
+
+/* bars */
+const barsWrap = document.getElementById('barsWrap');
+PARAM_ORDER.forEach(p=>{
+  const row = document.createElement('div');
+  row.innerHTML = `
+    <div class="flex items-center justify-between text-xs mb-0.5">
+      <span class="text-slate-300">${PARAM_LABELS[p]}</span>
+      <span id="barval-${p}" class="text-slate-400">50</span>
+    </div>
+    <div class="bar-track"><div id="bar-${p}" class="bar-fill" style="width:50%;background:#6366f1;"></div></div>`;
+  barsWrap.appendChild(row);
+});
+function barColor(v){
+  if(v<35) return '#22d3ee';
+  if(v<65) return '#6366f1';
+  if(v<85) return '#f59e0b';
+  return '#f43f5e';
+}
+
+/* ============================================================
+   АНАЛИЗ СОСТОЯНИЯ (краткий текст)
+   ============================================================ */
+function buildAnalysisText(result){
+  const lvl = v => v>=70?'высок':(v<=30?'низк':'умерен');
+  const dom = Object.entries(state).filter(([k])=>NT_KEYS.includes(k)).sort((a,b)=>b[1]-a[1])[0];
+  let parts = [];
+  parts.push(`${NT_LABELS[dom[0]]} на уровне ${dom[1]}% — доминирующий фактор текущего профиля.`);
+  if(result.motivation>65 && result.anxiety>60){
+    parts.push('Высокая мотивация сочетается с заметной тревожностью — типично при высоком дофамине/норадреналине на фоне невысокого серотонина.');
+  } else if(result.motivation<35){
+    parts.push('Мотивация и вознаграждение снижены — риск ангедонии.');
+  }
+  if(result.focus>65){ parts.push('Фокус внимания и исполнительные функции повышены.'); }
+  else if(result.focus<35){ parts.push('Фокус внимания ослаблен.'); }
+  if(result.regulation<35){ parts.push('Эмоциональная регуляция снижена — реакции могут быть менее устойчивыми.'); }
+  return parts.join(' ');
+}
+
+/* "Объяснить текущий профиль" — более развёрнутый текст */
+function buildExplainText(result){
+  const d=state.dopamine, s=state.serotonin, n=state.norepinephrine, g=state.gaba;
+  let out = `При дофамине ${d}%, серотонине ${s}%, норадреналине ${n}% и ГАМК ${g}% модель показывает: `;
+  const desc = [];
+  desc.push(`настроение ${Math.round(result.mood)}/100 (${result.mood>=60?'приподнятое':result.mood<=40?'сниженное':'нейтральное'}), `+
+             `тревожность ${Math.round(result.anxiety)}/100, мотивация и вознаграждение ${Math.round(result.motivation)}/100, `+
+             `фокус ${Math.round(result.focus)}/100, эмоциональная регуляция ${Math.round(result.regulation)}/100, энергия ${Math.round(result.energy)}/100.`);
+  out += desc.join('');
+  out += ' ';
+  if(n>130 && d>110 && s<90){
+    out += 'Сочетание повышенного норадреналина и дофамина при умеренно-низком серотонине повышает мотивацию и фокус, но заметно увеличивает риск тревожности и снижает эмоциональную гибкость — похоже на профиль сильной психостимуляции без достаточного «буфера» стабильности.';
+  } else if(s>120 && g>100){
+    out += 'Высокий серотонин в сочетании с достаточным ГАМК даёт хорошую эмоциональную стабильность и низкую тревожность, но не добавляет выраженной мотивации — типичный профиль спокойного, уравновешенного, но не гиперактивного состояния.';
+  } else if(d<60 && s<90){
+    out += 'Сниженный дофамин при невысоком серотонине хорошо согласуется с картиной ангедонии и сниженного настроения — уменьшено как удовольствие от вознаграждения, так и общая эмоциональная окраска.';
+  } else if(g>140){
+    out += 'Очень высокий уровень ГАМК даёт выраженное торможение возбуждения — тревожность падает, но вместе с ней снижаются энергия и мотивация.';
+  } else {
+    out += 'Профиль близок к сбалансированному, без резко выраженных перекосов ни в одном из параметров.';
+  }
+  return out;
+}
+
+/* ============================================================
+   ОБНОВЛЕНИЕ SVG (регионы, пути, анимация потока)
+   ============================================================ */
+function regionActivity(id){
+  // Возвращает 0..1 в зависимости от связанных нейромедиаторов региона
+  const info = REGION_INFO[id];
+  if(!info) return 0.5;
+  let sum=0;
+  info.nts.forEach(nt=>{ sum += state[nt]/200; });
+  return Math.max(0, Math.min(1, sum/info.nts.length));
+}
+
+function updateRegions(){
+  Object.keys(REGION_INFO).forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    const act = regionActivity(id);
+    el.style.opacity = (0.55 + act*0.55).toFixed(2);
+    const primaryNt = REGION_INFO[id].nts[0];
+    el.classList.toggle('glow-'+primaryNt, act>0.72);
+    NT_KEYS.filter(k=>k!==primaryNt).forEach(k=>el.classList.remove('glow-'+k));
+    el.classList.toggle('selected', id===selectedId);
+
+    if(el.dataset.group==='cortex'){
+      el.style.display = hideCortex ? 'none' : '';
+    }
+  });
+}
+
+function updatePaths(){
+  Object.keys(PATH_INFO).forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    const nt = el.dataset.nt;
+    const level = state[nt];
+    const norm = level/200;
+    const visible = pathFilter==='all' || nt===pathFilter;
+    el.style.display = visible ? '' : 'none';
+    el.style.strokeOpacity = (0.2 + norm*0.7).toFixed(2);
+    el.style.strokeWidth = (2 + norm*5).toFixed(1);
+    el.classList.toggle('glow-'+nt, level>150);
+    el.classList.toggle('selected', id===selectedId);
+  });
+}
+
+/* --- flow animation: движущиеся точки вдоль путей --- */
+const flowLayer = document.getElementById('flowLayer');
+const flowDots = {};
+Object.keys(PATH_INFO).forEach(id=>{
+  const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  dot.setAttribute('r','3.5');
+  dot.setAttribute('class','flow-dot');
+  dot.setAttribute('fill', getComputedStyle(document.documentElement).getPropertyValue('--'+document.getElementById(id).dataset.nt));
+  flowLayer.appendChild(dot);
+  flowDots[id] = { el:dot, t:Math.random() };
+});
+let lastFrame = performance.now();
+function animateFlow(now){
+  const dt = Math.min(0.05, (now-lastFrame)/1000);
+  lastFrame = now;
+  Object.keys(PATH_INFO).forEach(id=>{
+    const pathEl = document.getElementById(id);
+    const info = flowDots[id];
+    if(pathEl.style.display==='none'){ info.el.style.display='none'; return; }
+    info.el.style.display='';
+    const nt = pathEl.dataset.nt;
+    const speed = 0.05 + (state[nt]/200)*0.35; // доля пути в секунду
+    info.t = (info.t + speed*dt) % 1;
+    const len = pathEl.getTotalLength();
+    const pt = pathEl.getPointAtLength(info.t*len);
+    info.el.setAttribute('cx', pt.x);
+    info.el.setAttribute('cy', pt.y);
+    info.el.style.opacity = (0.4 + (state[nt]/200)*0.6).toFixed(2);
+  });
+  requestAnimationFrame(animateFlow);
+}
+requestAnimationFrame(animateFlow);
+
+/* ============================================================
+   INFO PANEL / КЛИКИ ПО РЕГИОНАМ И ПУТЯМ
+   ============================================================ */
+function showInfo(id){
+  const info = REGION_INFO[id] || PATH_INFO[id];
+  if(!info) return;
+  selectedId = id;
+  document.getElementById('infoEmpty').classList.add('hidden');
+  const content = document.getElementById('infoContent');
+  content.classList.remove('hidden');
+  document.getElementById('infoTitle').textContent = info.title;
+  document.getElementById('infoDesc').textContent = info.desc;
+  document.getElementById('infoEffect').textContent = 'Эффект: ' + info.effect;
+  const ntsWrap = document.getElementById('infoNts');
+  ntsWrap.innerHTML = '';
+  info.nts.forEach(nt=>{
+    const chip = document.createElement('span');
+    chip.className = 'text-[11px] px-2 py-0.5 rounded-full border';
+    chip.style.color = NT_COLORS[nt];
+    chip.style.borderColor = NT_COLORS[nt];
+    chip.textContent = NT_LABELS[nt];
+    ntsWrap.appendChild(chip);
+  });
+  render();
+}
+
+// Тонкие изогнутые пути (fill:none) кликабельны только по самой обводке —
+// добавляем невидимые «широкие» дубликаты поверх для удобного попадания кликом.
+const svgNS = 'http://www.w3.org/2000/svg';
+Object.keys(PATH_INFO).forEach(id=>{
+  const src = document.getElementById(id);
+  const hit = document.createElementNS(svgNS,'path');
+  hit.setAttribute('d', src.getAttribute('d'));
+  hit.setAttribute('fill','none');
+  hit.setAttribute('stroke','transparent');
+  hit.setAttribute('stroke-width','18');
+  hit.dataset.target = id;
+  hit.classList.add('pathway-hit');
+  hit.style.cursor = 'pointer';
+  flowLayer.after(hit);
+});
+
+document.getElementById('brainSvg').addEventListener('click', e=>{
+  const hit = e.target.closest('.pathway-hit');
+  const region = e.target.closest('.region');
+  const path = e.target.closest('.pathway');
+  if(hit) showInfo(hit.dataset.target);
+  else if(region) showInfo(region.id);
+  else if(path) showInfo(path.id);
+});
+
+document.getElementById('btnHighlight').addEventListener('click', ()=>{
+  if(!selectedId) return;
+  const info = PATH_INFO[selectedId];
+  let relatedIds = [];
+  if(info){ relatedIds = info.related; }
+  else {
+    relatedIds = Object.entries(PATH_INFO).filter(([,v])=>v.related.includes(selectedId)).map(([k])=>k);
+  }
+  relatedIds.forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.classList.add('selected');
+    setTimeout(()=>el.classList.remove('selected'), 1600);
+  });
+});
+
+/* ============================================================
+   ФИЛЬТРЫ
+   ============================================================ */
+document.querySelectorAll('input[name="pathFilter"]').forEach(r=>{
+  r.addEventListener('change', e=>{ pathFilter = e.target.value; render(); });
+});
+document.getElementById('hideCortex').addEventListener('change', e=>{
+  hideCortex = e.target.checked; render();
+});
+
+/* ============================================================
+   ПРЕСЕТЫ / СБРОС / СЛУЧАЙНЫЕ ЗНАЧЕНИЯ
+   ============================================================ */
+document.getElementById('presetSelect').addEventListener('change', e=>{
+  const p = PRESETS[e.target.value];
+  if(!p) return;
+  Object.assign(state, p);
+  syncSliderUI(); render();
+  e.target.value = '';
+});
+document.getElementById('btnReset').addEventListener('click', ()=>{
+  Object.assign(state, PRESETS.baseline);
+  state.sensitivity = 1;
+  sensInput.value = 100;
+  document.getElementById('sensitivityVal').textContent = '100%';
+  syncSliderUI(); render();
+});
+document.getElementById('btnRandom').addEventListener('click', ()=>{
+  NT_KEYS.forEach(nt=>{ state[nt] = Math.round(Math.random()*40)*5; });
+  syncSliderUI(); render();
+});
+
+/* ============================================================
+   "ОБЪЯСНИТЬ ПРОФИЛЬ" / О МОДЕЛИ
+   ============================================================ */
+document.getElementById('btnExplain').addEventListener('click', ()=>{
+  const result = computeState();
+  const box = document.getElementById('explainBox');
+  box.textContent = buildExplainText(result);
+  box.classList.remove('hidden');
+});
+
+const aboutModal = document.getElementById('aboutModal');
+document.getElementById('btnAbout').addEventListener('click', ()=>{
+  aboutModal.classList.remove('hidden'); aboutModal.classList.add('flex');
+});
+document.getElementById('btnAboutClose').addEventListener('click', ()=>{
+  aboutModal.classList.add('hidden'); aboutModal.classList.remove('flex');
+});
+aboutModal.addEventListener('click', e=>{ if(e.target===aboutModal){ aboutModal.classList.add('hidden'); aboutModal.classList.remove('flex'); }});
+
+/* ============================================================
+   ГЛАВНЫЙ ЦИКЛ ОТРИСОВКИ
+   ============================================================ */
+function render(){
+  const result = computeState();
+  radarChart.data.datasets[0].data = PARAM_ORDER.map(p=>Math.round(result[p]));
+  radarChart.update('none');
+
+  PARAM_ORDER.forEach(p=>{
+    const v = Math.round(result[p]);
+    document.getElementById(`barval-${p}`).textContent = v;
+    const bar = document.getElementById(`bar-${p}`);
+    bar.style.width = v + '%';
+    bar.style.background = barColor(v);
+  });
+
+  document.getElementById('analysisText').textContent = buildAnalysisText(result);
+  updateRegions();
+  updatePaths();
+}
+
+/* init */
+syncSliderUI();
+render();
+</script>
+</body>
+</html>
